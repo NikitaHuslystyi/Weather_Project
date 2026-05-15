@@ -11,14 +11,14 @@ import io
 class LeftContainer(widgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.current_selected_card = None
+        self.SWITCH_THEME_TOOGLE = False
         
         self.setFixedSize(370, 800)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
         
         self.LAYOUT = widgets.QVBoxLayout()
         self.setLayout(self.LAYOUT)
-        
-        self.SWITCH_THEME_TOOGLE = False
         
         switch_button_frame = widgets.QFrame(parent = self)
         switch_button_frame.setFixedSize(330, 44)
@@ -50,15 +50,14 @@ class LeftContainer(widgets.QFrame):
         
         switch_theme_button.clicked.connect(switch_icon)
         
-        
         # Указываем родителя QScrollArea
         scroll_area = widgets.QScrollArea(parent= self)
         
         # Указывает адаптивность размеров QScrollArea
         scroll_area.setWidgetResizable(True)
-        
+        scroll_area.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setFrameShape(widgets.QFrame.Shape.NoFrame)
         self.LAYOUT.addWidget(scroll_area)
-        
         
         scroll_frame = widgets.QFrame(parent= scroll_area)
         scroll_frame_layout = widgets.QVBoxLayout()
@@ -66,16 +65,47 @@ class LeftContainer(widgets.QFrame):
         scroll_frame_layout.setSpacing(10)
         scroll_frame.setLayout(scroll_frame_layout)
         
-        # Создать леаут для скролл фрейма
-        
-        
         scroll_area.setWidget(scroll_frame)
         
-        for number in range(10):
+        cities = [
+            "Kyiv",
+            "Kharkiv",
+            "Odesa",
+            "Dnipro",
+            "Lviv",
+            "Zaporizhzhia",
+            "Kryvyi Rih",
+            "Mykolaiv",
+            "Vinnytsia",
+            "Kherson",
+            "Poltava",
+            "Chernihiv",
+            "Sumy",
+            "Zhytomyr",
+            "Cherkasy",
+            "Khmelnytskyi",
+            "Rivne",
+            "Ivano-Frankivsk",
+            "Ternopil",
+            "Lutsk",
+            "Uzhhorod",
+            "Crimea",
+            "Donetsk",
+            "Luhansk",
+            "Copenhagen"
+        ]
+        
+        for city in cities:
             card = Cards(
-            parent= scroll_frame,
-            city = f"City {number}"
+                parent=scroll_frame,
+                city_name=city
             )
+            def on_card_selected(clicked_card, c=card):
+                if self.current_selected_card:
+                    self.current_selected_card.set_selected(False)
+                c.set_selected(True)
+                self.current_selected_card = c
+            card.on_select_callback = on_card_selected
             scroll_frame_layout.addWidget(card)
         
         

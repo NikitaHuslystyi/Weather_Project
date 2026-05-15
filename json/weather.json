@@ -1,0 +1,45 @@
+{
+    "coord": {
+        "lon": 12.5655,
+        "lat": 55.6759
+    },
+    "weather": [
+        {
+            "id": 804,
+            "main": "Clouds",
+            "description": "хмарно",
+            "icon": "04d"
+        }
+    ],
+    "base": "stations",
+    "main": {
+        "temp": 10.78,
+        "feels_like": 9.64,
+        "temp_min": 10.19,
+        "temp_max": 10.94,
+        "pressure": 1001,
+        "humidity": 66,
+        "sea_level": 1001,
+        "grnd_level": 1000
+    },
+    "visibility": 10000,
+    "wind": {
+        "speed": 6.17,
+        "deg": 160
+    },
+    "clouds": {
+        "all": 96
+    },
+    "dt": 1778870708,
+    "sys": {
+        "type": 2,
+        "id": 2035645,
+        "country": "DK",
+        "sunrise": 1778813939,
+        "sunset": 1778872402
+    },
+    "timezone": 7200,
+    "id": 2618425,
+    "name": "Copenhagen",
+    "cod": 200
+}
