@@ -100,11 +100,11 @@ class LeftContainer(widgets.QFrame):
                 parent=scroll_frame,
                 city_name=city
             )
-            def on_card_selected(clicked_card, c=card):
+            def on_card_selected(clicked_card):
                 if self.current_selected_card:
                     self.current_selected_card.set_selected(False)
-                c.set_selected(True)
-                self.current_selected_card = c
+                clicked_card.set_selected(True)
+                self.current_selected_card = clicked_card
             card.on_select_callback = on_card_selected
             scroll_frame_layout.addWidget(card)
         
