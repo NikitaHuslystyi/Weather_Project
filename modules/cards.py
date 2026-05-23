@@ -12,23 +12,23 @@ class Cards(widgets.QFrame):
         self.selected = False
         self.on_select_callback = None
         
-        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); background: transparent; border-radius: 10px; border-bottom: 1px solid white")
+        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); background: transparent; border-radius: 0px; border-bottom: 1px solid rgba(255, 255, 255, 0.2)")
         self.setFixedSize(330, 90)
         card_frame_layout = widgets.QHBoxLayout()
         self.setLayout(card_frame_layout)
         
         left_layout = widgets.QVBoxLayout()
         left_layout.setSpacing(2)
-        left_layout.setContentsMargins(5,1,5,5)
+        left_layout.setContentsMargins(5,1,5,10)
         left_frame = widgets.QFrame()
         left_frame.setFixedSize(180, 90)
         
         self.left_label1 = widgets.QLabel(text = city_name)
-        self.left_label1.setStyleSheet("color: white; font-size: 24px; font-weight: 500;")
+        self.left_label1.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 24px; font-weight: 500;")
         self.left_label2 = widgets.QLabel(text = "")
-        self.left_label2.setStyleSheet("font-size: 14px; font-weight: 500;")
+        self.left_label2.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 500;")
         self.left_label3 = widgets.QLabel(text = "")
-        self.left_label3.setStyleSheet("font-size: 14px; font-weight: 500;")
+        self.left_label3.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 500;")
         
         self.icon_label = widgets.QLabel()
         self.icon_label.setFixedSize(16, 16)
@@ -38,6 +38,7 @@ class Cards(widgets.QFrame):
         self.title_layout.setSpacing(5)
         self.title_layout.setContentsMargins(0, 0, 0, 0)
         self.title_layout.addWidget(self.icon_label)
+        self.title_layout.setSpacing(10)
         self.title_layout.addWidget(self.left_label1)
         title_container = widgets.QFrame()
         title_container.setLayout(self.title_layout)
@@ -64,14 +65,14 @@ class Cards(widgets.QFrame):
         
         right_layout = widgets.QVBoxLayout()
         right_layout.setSpacing(14)
-        right_layout.setContentsMargins(5,5,5,5)
+        right_layout.setContentsMargins(5,5,0,10)
         
         right_frame = widgets.QFrame()
         self.right_label1 = widgets.QLabel(text = "")
         self.right_label2 = widgets.QLabel(text = "")
 
-        self.right_label1.setStyleSheet("color: white; font-size: 44px; font-weight: 500;")
-        self.right_label2.setStyleSheet("color: white; font-weight: 500; font-size: 12px;")
+        self.right_label1.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 44px; font-weight: 500;")
+        self.right_label2.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-weight: 500; font-size: 12px;")
         right_frame.setStyleSheet("""
                                 QFrame{
                                     background: transparent;
@@ -79,7 +80,6 @@ class Cards(widgets.QFrame):
                                 }
                                 QLabel{
                                     border: none;
-                                    color: white;
                                 }
                             """)
         right_frame.setFixedSize(160,90)
@@ -92,24 +92,24 @@ class Cards(widgets.QFrame):
         card_frame_layout.setSpacing(10)
         card_frame_layout.setContentsMargins(5,5,5,5)
         card_frame_layout.addStretch(1)
-        card_frame_layout.addWidget(right_frame)
+        card_frame_layout.addWidget(right_frame, alignment = core.Qt.AlignmentFlag.AlignRight)
 
 
 
         self.timezone_offset = 0
 
         self.update_timer = core.QTimer(self)
-        self.update_timer.timeout.connect(self.refresh_weather)
+        self.update_timer.timeout.connect(self.refresh_weather1)
         self.update_timer.start(60000)
 
         self.time_timer = core.QTimer(self)
         self.time_timer.timeout.connect(self.update_local_time)
         self.time_timer.start(1000)
 
-        self.refresh_weather()
+        self.refresh_weather1()
         self.update_local_time()
 
-    def refresh_weather(self):
+    def refresh_weather1(self):
         weather_data = request(city_name=self.city_name)
         json_write("weather.json", weather_data)
 
@@ -135,12 +135,12 @@ class Cards(widgets.QFrame):
             self.setStyleSheet("""
                 background-color: rgba(0, 0, 0, 0.2);
                 border-radius: 10px;
-                border: none;
+                border-bottom: none;
             """)
         else:
             self.icon_label.setVisible(False)
             self.setStyleSheet("""
                 background: transparent;
-                border-radius: 10px;
-                border-bottom: 1px solid white;
+                border-radius: 0px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             """)

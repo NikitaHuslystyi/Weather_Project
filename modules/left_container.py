@@ -2,6 +2,7 @@ import PyQt6.QtWidgets as widgets
 import PyQt6.QtGui as QtGui
 import PyQt6.QtCore as core
 import PyQt6.QtWebEngineWidgets as WebEngine
+from .weather_container import WeatherContainer
 from .cards import Cards 
 
 import folium 
@@ -9,15 +10,17 @@ import io
 
 
 class LeftContainer(widgets.QFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, weather_container):
         super().__init__(parent)
         self.current_selected_card = None
         self.SWITCH_THEME_TOOGLE = False
-        
+        self.weather_container = weather_container
+
         self.setFixedSize(370, 800)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
         
         self.LAYOUT = widgets.QVBoxLayout()
+        self.LAYOUT.addSpacing(10)
         self.setLayout(self.LAYOUT)
         
         switch_button_frame = widgets.QFrame(parent = self)
@@ -28,6 +31,7 @@ class LeftContainer(widgets.QFrame):
         self.LAYOUT.setAlignment(core.Qt.AlignmentFlag.AlignTop)
         
         switch_theme_button_layout = widgets.QHBoxLayout()
+        switch_theme_button_layout.setContentsMargins(0, 10, 0, 10)
         switch_theme_button = widgets.QPushButton(parent = switch_button_frame)
         switch_theme_button.setFixedSize(52,24)
         switch_theme_button.setIconSize(core.QSize(52,24))
@@ -105,6 +109,7 @@ class LeftContainer(widgets.QFrame):
                     self.current_selected_card.set_selected(False)
                 clicked_card.set_selected(True)
                 self.current_selected_card = clicked_card
+                self.weather_container.update_city(clicked_card.city_name)
             card.on_select_callback = on_card_selected
             scroll_frame_layout.addWidget(card)
         

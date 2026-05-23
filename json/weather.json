@@ -5,38 +5,38 @@
     },
     "weather": [
         {
-            "id": 804,
+            "id": 801,
             "main": "Clouds",
-            "description": "хмарно",
-            "icon": "04d"
+            "description": "кілька хмар",
+            "icon": "02d"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 11.07,
-        "feels_like": 10.11,
-        "temp_min": 10.19,
-        "temp_max": 11.19,
-        "pressure": 1004,
+        "temp": 18.94,
+        "feels_like": 18.77,
+        "temp_min": 18.94,
+        "temp_max": 23.19,
+        "pressure": 1025,
         "humidity": 72,
-        "sea_level": 1004,
-        "grnd_level": 1003
+        "sea_level": 1025,
+        "grnd_level": 1023
     },
     "visibility": 10000,
     "wind": {
-        "speed": 8.23,
-        "deg": 220
+        "speed": 4.63,
+        "deg": 190
     },
     "clouds": {
-        "all": 100
+        "all": 20
     },
-    "dt": 1778949380,
+    "dt": 1779558117,
     "sys": {
-        "type": 2,
-        "id": 2035645,
+        "type": 1,
+        "id": 1575,
         "country": "DK",
-        "sunrise": 1778900231,
-        "sunset": 1778958912
+        "sunrise": 1779504344,
+        "sunset": 1779564451
     },
     "timezone": 7200,
     "id": 2618425,

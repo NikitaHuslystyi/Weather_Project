@@ -43,7 +43,7 @@ class MainWindow(widgets.QMainWindow):
         
         
         central_widget = widgets.QWidget(content_container)
-        central_widget.setFixedSize(1200,760  )
+        central_widget.setFixedSize(1200,760)
         content_layout.addWidget(central_widget)
         
         center_widget_layout = widgets.QHBoxLayout()
@@ -53,8 +53,11 @@ class MainWindow(widgets.QMainWindow):
         
         central_widget.setLayout(center_widget_layout)
         
-        self.LEFT_CONTAINER = LeftContainer(parent = central_widget)
         self.WEATHER_CONTAINER = WeatherContainer(parent = central_widget)
+        self.LEFT_CONTAINER = LeftContainer(
+            parent=central_widget,
+            weather_container=self.WEATHER_CONTAINER
+        )
         
         center_widget_layout.addWidget(self.LEFT_CONTAINER)
         center_widget_layout.addWidget(self.WEATHER_CONTAINER)
