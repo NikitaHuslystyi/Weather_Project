@@ -110,7 +110,7 @@ class Cards(widgets.QFrame):
         self.update_local_time()
 
     def refresh_weather1(self):
-        weather_data = request(city_name=self.city_name)
+        weather_data = request(city_name=self.city_name, request_type="current_weather")
         json_write("weather.json", weather_data)
 
         self.left_label1.setText(weather_data['name'])

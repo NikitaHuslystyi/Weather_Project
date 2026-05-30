@@ -96,7 +96,9 @@ class LeftContainer(widgets.QFrame):
             "Crimea",
             "Donetsk",
             "Luhansk",
-            "Copenhagen"
+            "Copenhagen",
+            "New York",
+            "Bratislava"
         ]
         
         for city in cities:
