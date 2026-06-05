@@ -1,8 +1,10 @@
+from urllib import response
 import PyQt6.QtCore as core
 import PyQt6.QtWidgets as widgets
 import PyQt6.QtGui as gui
 from datetime import datetime, timedelta
 import json
+import requests
 from utils import request
 from utils import json_write
 from .weather_scroll import ForecastCard
@@ -14,38 +16,134 @@ class WeatherContainer(widgets.QFrame):
         super().__init__(parent)
         self.city_name = "Dnipro"
 
-        self.setFixedSize(828, 800)
+        self.setFixedSize(828, 828)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA)")
         
         self.WEATHER_CONTEINER_LAYOUT = widgets.QVBoxLayout(self)
-        self.WEATHER_CONTEINER_LAYOUT.setContentsMargins(20, 20, 20, 40)
+        self.WEATHER_CONTEINER_LAYOUT.setContentsMargins(20, 10, 20, 80)
         self.WEATHER_CONTEINER_LAYOUT.setSpacing(0)
         self.setLayout(self.WEATHER_CONTEINER_LAYOUT)
         
         self.TOP_FRAME = widgets.QFrame(self)
         self.TOP_FRAME.setFixedSize(788, 36)
-        self.TOP_FRAME.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border-bottom: none;")
+        self.TOP_FRAME.setStyleSheet("background-color: transparent; border-radius: 10px; border-bottom: none;")
+        
+        self.top_layout = widgets.QHBoxLayout()
+        self.top_layout.setContentsMargins(0, 0, 0, 0)
+        self.TOP_FRAME.setLayout(self.top_layout)
+        
+        self.full_settings_frame = widgets.QFrame()
+        self.full_settings_frame.setFixedSize(144, 36)
+        self.full_settings_frame.setStyleSheet("background: transparent; border: none;")
+        self.full_settings_layout = widgets.QHBoxLayout()
+        self.full_settings_layout.setContentsMargins(0, 0, 0, 0)
+        self.full_settings_frame.setLayout(self.full_settings_layout)
+        
+        
+        self.setting_button_frame = widgets.QFrame()
+        self.full_settings_layout.addWidget(self.setting_button_frame, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.setting_button_frame.setFixedSize(36, 36)
+        self.setting_button_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; border-bottom: none;")
+        
+        self.setting_button_layout = widgets.QHBoxLayout()
+        self.setting_button_layout.setContentsMargins(10, 10, 10, 10)
+        self.setting_button_layout.setSpacing(0)
+        
+        self.setting_button = widgets.QPushButton()
+        self.setting_button.setFixedSize(16, 16)
+        self.setting_button.setIconSize(core.QSize(36,36))
+        self.setting_button.setStyleSheet("border: none; background-color: transparent;")
+        
+        self.setting_button_layout.addWidget(self.setting_button)
+        self.setting_button_layout.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        self.setting_button_frame.setLayout(self.setting_button_layout)
+        setting_icon = gui.QIcon("media/title_bar/settings.png")
+        self.setting_button.setIcon(setting_icon)
+        
+        self.settings_label = widgets.QLabel(text = "Налаштування")
+        self.settings_label.setFixedSize(98, 16)
+        self.settings_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 500;")
+        self.full_settings_layout.addWidget(self.settings_label, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        self.top_layout.addWidget(self.full_settings_frame, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        self.full_searching_frame = widgets.QFrame()
+        self.full_searching_frame.setFixedSize(261, 36)
+        self.full_searching_frame.setStyleSheet("background: rgba(0, 0, 0, 0.2); border: none; border-radius: 4px;")
+        self.full_searching_layout = widgets.QHBoxLayout()
+        self.full_searching_layout.setContentsMargins(7, 8, 7, 8)
+        self.full_searching_frame.setLayout(self.full_searching_layout)
+        
+        self.search_gryph_label = widgets.QLabel()
+        self.search_gryph_label.setFixedSize(25, 22)
+        self.search_gryph_label.setPixmap(gui.QPixmap("media/title_bar/Search Glyph.png"))
+        self.search_gryph_label.setStyleSheet("background: transparent;")
+        
+        
+        self.search_input = widgets.QLineEdit()
+        self.search_input.setStyleSheet("background: transparent; border: none; font-size: 17px; font-weight: 400; color: rgba(255, 255, 255, 1);")
+        self.search_input.setFixedSize(220, 22)
+        self.search_input.setPlaceholderText("Пошук")
+        
+        # Кнопка очищення поля пошуку
+        self.clear_search_button = widgets.QPushButton()
+        self.clear_search_button.setFixedSize(16, 16)
+        self.clear_search_button.setStyleSheet("border: none; background-color: transparent;")
+        self.clear_search_button.setCursor(core.Qt.CursorShape.PointingHandCursor)
+        clear_icon = gui.QIcon("media/title_bar/Clear.png")
+        self.clear_search_button.setIcon(clear_icon)
+        self.clear_search_button.clicked.connect(self.clear_search_field)
+        
+        self.full_searching_layout.addWidget(self.search_gryph_label, alignment = core.Qt.AlignmentFlag.AlignRight)
+        self.full_searching_layout.setSpacing(0)
+        self.full_searching_layout.addWidget(self.search_input, alignment = core.Qt.AlignmentFlag.AlignRight)
+        self.full_searching_layout.addWidget(self.clear_search_button, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        #add button
+        self.add_button = widgets.QPushButton()
+        self.add_button.setFixedSize(97, 36)
+        self.add_button.setStyleSheet("background: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
+        button_layout = widgets.QHBoxLayout(self.add_button)
+        button_layout.setContentsMargins(7, 8, 7, 8)
+        button_layout.setSpacing(6)
+        
+        add_icon_label = widgets.QLabel()
+        add_icon_label.setFixedSize(16, 16)
+        add_icon_label.setStyleSheet("background: transparent;")
+        add_icon_label.setPixmap(gui.QPixmap("media/title_bar/plus-circle.png").scaled(16, 16, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
+        text_label = widgets.QLabel("Додати")
+        text_label.setFixedSize(58, 22)
+        text_label.setStyleSheet("color: white; background: transparent; font-size: 17px; font-weight: 400;")
+        button_layout.addWidget(add_icon_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        button_layout.addWidget(text_label)
+        button_layout.addStretch()
+        
+        self.top_layout.addWidget(self.full_settings_frame, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.top_layout.addStretch()
+        self.top_layout.addWidget(self.add_button)
+        self.top_layout.addSpacing(0)
+        self.top_layout.addWidget(self.full_searching_frame)
+        
+        self.add_button.setVisible(False)
+        
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.TOP_FRAME)
-        self.WEATHER_CONTEINER_LAYOUT.addSpacing(20)
+        self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
 
         self.CENTRAL_FRAME = widgets.QFrame(self)
         self.CENTRAL_FRAME.setFixedSize(788, 303)
         self.CENTRAL_FRAME.setStyleSheet("background-color: transparent")
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.CENTRAL_FRAME)
-        self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
+        self.WEATHER_CONTEINER_LAYOUT.addSpacing(4)
         self.CENTRAL_LAYOUT = widgets.QHBoxLayout(self.CENTRAL_FRAME)
         self.CENTRAL_LAYOUT.setSpacing(10)
         self.CENTRAL_LAYOUT.setContentsMargins(0, 0, 0, 0)
         self.CENTRAL_FRAME.setLayout(self.CENTRAL_LAYOUT)
         
         self.weather_right_frame = widgets.QFrame()
-        self.weather_right_frame.setStyleSheet("""
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            border-bottom: none;
-        """)
+        self.weather_right_frame.setFixedSize(390, 303)
+        self.weather_right_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border-bottom: none;")
         self.weather_right_layout1 = widgets.QVBoxLayout()
-        self.weather_right_layout1.setContentsMargins(16, 8, 16, 8)
+        self.weather_right_layout1.setContentsMargins(16, 8, 16, 16)
         self.weather_right_layout1.setSpacing(10)
         
         self.today_wrap = widgets.QFrame()
@@ -92,19 +190,23 @@ class WeatherContainer(widgets.QFrame):
         self.time_label_layout.addWidget(self.time_label, alignment = core.Qt.AlignmentFlag.AlignCenter)
 
         self.weather_right_layout2 = widgets.QHBoxLayout()
+        self.weather_right_layout2.setContentsMargins(0, 0, 0, 0)
+        self.weather_right_layout2.setSpacing(0)
         self.right_frame1.setLayout(self.weather_right_layout2)
-        self.weather_right_layout2.addWidget(self.text_day_label)
-        self.weather_right_layout2.addSpacing(80)
-        self.weather_right_layout2.addWidget(self.text_data_label)
+        self.weather_right_layout2.addWidget(self.text_day_label, alignment=core.Qt.AlignmentFlag.AlignLeft)
+        self.weather_right_layout2.addStretch()
+        self.weather_right_layout2.addWidget(self.text_data_label, alignment=core.Qt.AlignmentFlag.AlignRight)
         
         self.today_wrap_layout.addWidget(self.today_right_label)
         self.weather_right_layout1.addWidget(self.today_wrap)
         self.weather_right_layout1.addWidget(self.right_frame1)
+        self.weather_right_layout1.addSpacing(0)
         self.weather_right_layout1.addWidget(self.watch_label, alignment = core.Qt.AlignmentFlag.AlignHCenter)
         self.weather_right_frame.setLayout(self.weather_right_layout1)
         
         
         self.weather_left_frame = widgets.QFrame()
+        self.weather_left_frame.setFixedSize(390, 303)
         self.weather_left_frame.setStyleSheet("""
             background-color: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
@@ -210,6 +312,7 @@ class WeatherContainer(widgets.QFrame):
         self.weather_left_layout.addWidget(self.left_frame1)
         self.weather_left_layout.addSpacing(10)
         self.weather_left_layout.addWidget(self.town_name_label, alignment = core.Qt.AlignmentFlag.AlignHCenter)
+        self.weather_left_layout.addSpacing(6)
         self.weather_left_layout.addWidget(self.left_frame2, alignment = core.Qt.AlignmentFlag.AlignHCenter)
         self.weather_left_layout.addWidget(self.left_frame3, alignment = core.Qt.AlignmentFlag.AlignHCenter)
         
@@ -331,7 +434,7 @@ class WeatherContainer(widgets.QFrame):
             self.scroll_layout.addWidget(forecast_card)
         
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.forecast_weather_frame)
-        self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
+        self.WEATHER_CONTEINER_LAYOUT.addSpacing(5)
         
         # Діаграма погоди
         self.weather_sheet_frame = widgets.QFrame()
@@ -525,3 +628,17 @@ class WeatherContainer(widgets.QFrame):
             else:
                 forecast_card.setVisible(False)
         
+    def clear_search_field(self):
+        self.search_input.clear()
+        self.search_input.setFocus()
+
+    def load_cities(self):
+        response = requests.get("https://countriesnow.space/api/v0.1/countries")
+        data = response.json()
+        cities = []
+        for country in data["data"]:
+            cities.extend(country["cities"])
+        cities = sorted(set(cities))
+        with open("cities.json", "w", encoding="utf-8") as file:
+            json.dump(cities, file, ensure_ascii=False, indent=4)
+        return cities

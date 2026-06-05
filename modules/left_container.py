@@ -4,6 +4,7 @@ import PyQt6.QtCore as core
 import PyQt6.QtWebEngineWidgets as WebEngine
 from .weather_container import WeatherContainer
 from .cards import Cards 
+from utils import request, json_write
 
 import folium 
 import io
@@ -16,11 +17,11 @@ class LeftContainer(widgets.QFrame):
         self.SWITCH_THEME_TOOGLE = False
         self.weather_container = weather_container
 
-        self.setFixedSize(370, 800)
+        self.setFixedSize(370, 828)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
         
         self.LAYOUT = widgets.QVBoxLayout()
-        self.LAYOUT.addSpacing(10)
+        self.LAYOUT.addSpacing(0)
         self.setLayout(self.LAYOUT)
         
         switch_button_frame = widgets.QFrame(parent = self)
@@ -31,7 +32,7 @@ class LeftContainer(widgets.QFrame):
         self.LAYOUT.setAlignment(core.Qt.AlignmentFlag.AlignTop)
         
         switch_theme_button_layout = widgets.QHBoxLayout()
-        switch_theme_button_layout.setContentsMargins(0, 10, 0, 10)
+        switch_theme_button_layout.setContentsMargins(0, 0, 0, 0)
         switch_theme_button = widgets.QPushButton(parent = switch_button_frame)
         switch_theme_button.setFixedSize(52,24)
         switch_theme_button.setIconSize(core.QSize(52,24))

@@ -5,38 +5,39 @@
     },
     "weather": [
         {
-            "id": 800,
-            "main": "Clear",
-            "description": "чисте небо",
-            "icon": "01n"
+            "id": 804,
+            "main": "Clouds",
+            "description": "хмарно",
+            "icon": "04n"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 19.81,
-        "feels_like": 19.62,
-        "temp_min": 19.81,
-        "temp_max": 19.81,
-        "pressure": 1015,
-        "humidity": 68,
-        "sea_level": 1015,
-        "grnd_level": 994
+        "temp": 15.9,
+        "feels_like": 15.69,
+        "temp_min": 15.9,
+        "temp_max": 16.46,
+        "pressure": 1009,
+        "humidity": 82,
+        "sea_level": 1009,
+        "grnd_level": 988
     },
     "visibility": 10000,
     "wind": {
-        "speed": 6.69,
-        "deg": 290
+        "speed": 2.25,
+        "deg": 239,
+        "gust": 3.98
     },
     "clouds": {
-        "all": 0
+        "all": 100
     },
-    "dt": 1780174410,
+    "dt": 1780624037,
     "sys": {
-        "type": 1,
-        "id": 7046,
+        "type": 2,
+        "id": 2096381,
         "country": "SK",
-        "sunrise": 1780109846,
-        "sunset": 1780166465
+        "sunrise": 1780628022,
+        "sunset": 1780685201
     },
     "timezone": 7200,
     "id": 3060972,

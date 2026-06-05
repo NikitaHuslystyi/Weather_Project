@@ -15,7 +15,7 @@ class MainWindow(widgets.QMainWindow):
         self.setWindowFlags(core.Qt.WindowType.FramelessWindowHint)
         
         window_width = 1200
-        window_height = 800
+        window_height = 828
 
         screen = application.primaryScreen()
         screen_size = screen.size()
@@ -43,7 +43,7 @@ class MainWindow(widgets.QMainWindow):
         
         
         central_widget = widgets.QWidget(content_container)
-        central_widget.setFixedSize(1200,760)
+        central_widget.setFixedSize(1200,828)
         content_layout.addWidget(central_widget)
         
         center_widget_layout = widgets.QHBoxLayout()
