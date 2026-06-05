@@ -1,46 +1,46 @@
 {
     "coord": {
-        "lon": 17.1067,
-        "lat": 48.1482
+        "lon": -74.006,
+        "lat": 40.7143
     },
     "weather": [
         {
             "id": 804,
             "main": "Clouds",
             "description": "хмарно",
-            "icon": "04n"
+            "icon": "04d"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 15.9,
-        "feels_like": 15.69,
-        "temp_min": 15.9,
-        "temp_max": 16.46,
-        "pressure": 1009,
-        "humidity": 82,
-        "sea_level": 1009,
-        "grnd_level": 988
+        "temp": 30.38,
+        "feels_like": 29.19,
+        "temp_min": 28.86,
+        "temp_max": 32.12,
+        "pressure": 1015,
+        "humidity": 31,
+        "sea_level": 1015,
+        "grnd_level": 1014
     },
     "visibility": 10000,
     "wind": {
-        "speed": 2.25,
-        "deg": 239,
-        "gust": 3.98
+        "speed": 0.89,
+        "deg": 20,
+        "gust": 1.79
     },
     "clouds": {
-        "all": 100
+        "all": 98
     },
-    "dt": 1780624037,
+    "dt": 1780676702,
     "sys": {
         "type": 2,
-        "id": 2096381,
-        "country": "SK",
-        "sunrise": 1780628022,
-        "sunset": 1780685201
+        "id": 2009754,
+        "country": "US",
+        "sunrise": 1780651547,
+        "sunset": 1780705414
     },
-    "timezone": 7200,
-    "id": 3060972,
-    "name": "Bratislava",
+    "timezone": -14400,
+    "id": 5128581,
+    "name": "New York",
     "cod": 200
 }

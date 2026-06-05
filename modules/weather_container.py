@@ -5,16 +5,19 @@ import PyQt6.QtGui as gui
 from datetime import datetime, timedelta
 import json
 import requests
+import os
 from utils import request
 from utils import json_write
 from .weather_scroll import ForecastCard
 from .diagrama import WeatherDiagram
-
+from .searched_card import SearchCityCard
 
 class WeatherContainer(widgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.city_name = "Dnipro"
+        self.selected_search_city = None
+        self.left_container_ref = None
 
         self.setFixedSize(828, 828)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA)")
@@ -34,7 +37,7 @@ class WeatherContainer(widgets.QFrame):
         
         self.full_settings_frame = widgets.QFrame()
         self.full_settings_frame.setFixedSize(144, 36)
-        self.full_settings_frame.setStyleSheet("background: transparent; border: none;")
+        self.full_settings_frame.setStyleSheet("background-color: transparent; border: none;")
         self.full_settings_layout = widgets.QHBoxLayout()
         self.full_settings_layout.setContentsMargins(0, 0, 0, 0)
         self.full_settings_frame.setLayout(self.full_settings_layout)
@@ -69,7 +72,7 @@ class WeatherContainer(widgets.QFrame):
         
         self.full_searching_frame = widgets.QFrame()
         self.full_searching_frame.setFixedSize(261, 36)
-        self.full_searching_frame.setStyleSheet("background: rgba(0, 0, 0, 0.2); border: none; border-radius: 4px;")
+        self.full_searching_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border: none; border-radius: 4px;")
         self.full_searching_layout = widgets.QHBoxLayout()
         self.full_searching_layout.setContentsMargins(7, 8, 7, 8)
         self.full_searching_frame.setLayout(self.full_searching_layout)
@@ -77,11 +80,11 @@ class WeatherContainer(widgets.QFrame):
         self.search_gryph_label = widgets.QLabel()
         self.search_gryph_label.setFixedSize(25, 22)
         self.search_gryph_label.setPixmap(gui.QPixmap("media/title_bar/Search Glyph.png"))
-        self.search_gryph_label.setStyleSheet("background: transparent;")
+        self.search_gryph_label.setStyleSheet("background-color: transparent;")
         
         
         self.search_input = widgets.QLineEdit()
-        self.search_input.setStyleSheet("background: transparent; border: none; font-size: 17px; font-weight: 400; color: rgba(255, 255, 255, 1);")
+        self.search_input.setStyleSheet("background-color: transparent; border: none; font-size: 17px; font-weight: 400; color: rgba(255, 255, 255, 1);")
         self.search_input.setFixedSize(220, 22)
         self.search_input.setPlaceholderText("Пошук")
         
@@ -102,18 +105,18 @@ class WeatherContainer(widgets.QFrame):
         #add button
         self.add_button = widgets.QPushButton()
         self.add_button.setFixedSize(97, 36)
-        self.add_button.setStyleSheet("background: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
+        self.add_button.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
         button_layout = widgets.QHBoxLayout(self.add_button)
         button_layout.setContentsMargins(7, 8, 7, 8)
         button_layout.setSpacing(6)
         
         add_icon_label = widgets.QLabel()
         add_icon_label.setFixedSize(16, 16)
-        add_icon_label.setStyleSheet("background: transparent;")
+        add_icon_label.setStyleSheet("background-color: transparent;")
         add_icon_label.setPixmap(gui.QPixmap("media/title_bar/plus-circle.png").scaled(16, 16, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
         text_label = widgets.QLabel("Додати")
         text_label.setFixedSize(58, 22)
-        text_label.setStyleSheet("color: white; background: transparent; font-size: 17px; font-weight: 400;")
+        text_label.setStyleSheet("color: white; background-color: transparent; font-size: 17px; font-weight: 400;")
         button_layout.addWidget(add_icon_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
         button_layout.addWidget(text_label)
         button_layout.addStretch()
@@ -125,6 +128,60 @@ class WeatherContainer(widgets.QFrame):
         self.top_layout.addWidget(self.full_searching_frame)
         
         self.add_button.setVisible(False)
+        
+
+
+        # Подключаем сигналы
+        self.search_input.textChanged.connect(self.on_search_text_changed)
+        self.add_button.clicked.connect(self.on_add_city)
+
+        # Dropdown фрейм
+        self.search_dropdown_frame = widgets.QFrame(self)
+        self.search_dropdown_frame.setGeometry(547, 56, 261, 200)
+        self.search_dropdown_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border: none;}")
+        self.search_dropdown_frame.setVisible(False)
+
+        dropdown_main_layout = widgets.QVBoxLayout(self.search_dropdown_frame)
+        dropdown_main_layout.setContentsMargins(0, 0, 0, 0)
+        dropdown_main_layout.setSpacing(0)
+
+        # Заголовок
+        self.dropdown_header = widgets.QLabel("Результати пошуку")
+        self.dropdown_header.setFixedSize(261, 32)
+        self.dropdown_header.setAlignment(core.Qt.AlignmentFlag.AlignLeft)
+        self.dropdown_header.setStyleSheet("""
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: 400;
+            background: transparent;
+            border: none;
+            border-radius: 0px;
+            padding-left: 6px;
+            padding-top: 8px;
+            padding-right: px;
+        """)
+        dropdown_main_layout.addWidget(self.dropdown_header)
+
+        # Скролл-область
+        self.dropdown_scroll_area = widgets.QScrollArea()
+        self.dropdown_scroll_area.setStyleSheet("background: transparent; border: none; border-radius: 0px;")
+        self.dropdown_scroll_area.setWidgetResizable(True)
+        self.dropdown_scroll_area.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.dropdown_scroll_area.setHorizontalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.dropdown_scroll_area.setFrameShape(widgets.QFrame.Shape.NoFrame)
+
+        self.dropdown_scroll_content = widgets.QFrame()
+        self.dropdown_scroll_content.setStyleSheet("background: transparent; border: none; border-radius: 0px;")
+        self.dropdown_scroll_layout = widgets.QVBoxLayout(self.dropdown_scroll_content)
+        self.dropdown_scroll_layout.setContentsMargins(0, 0, 0, 0)
+        self.dropdown_scroll_layout.setSpacing(0)
+        self.dropdown_scroll_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+
+        self.dropdown_scroll_area.setWidget(self.dropdown_scroll_content)
+        dropdown_main_layout.addWidget(self.dropdown_scroll_area)
+
+        self.search_dropdown_frame.raise_()
+
         
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.TOP_FRAME)
         self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
@@ -551,7 +608,6 @@ class WeatherContainer(widgets.QFrame):
         self.time_timer.timeout.connect(self.update_watch_time)
         self.time_timer.start(10000)
         
-        
     def update_city(self, city_name):
         self.city_name = city_name
         self.refresh_weather2()
@@ -639,6 +695,67 @@ class WeatherContainer(widgets.QFrame):
         for country in data["data"]:
             cities.extend(country["cities"])
         cities = sorted(set(cities))
-        with open("cities.json", "w", encoding="utf-8") as file:
+        path = os.path.join(os.path.dirname(__file__), "..", "cities.json")
+        with open(path, "w", encoding="utf-8") as file:
             json.dump(cities, file, ensure_ascii=False, indent=4)
+        print(f"Збережено {len(cities)} міст")
         return cities
+
+    def on_search_text_changed(self, text):
+        text = text.strip()
+        if not text:
+            self.search_dropdown_frame.setVisible(False)
+            self.add_button.setVisible(False)
+            self.selected_search_city = None
+            return
+
+        cities = self._get_cities_list()
+        matched = [c for c in cities if c.lower().startswith(text.lower())][:15]
+
+        # Очищаем старые карточки
+        while self.dropdown_scroll_layout.count():
+            item = self.dropdown_scroll_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if not matched:
+            self.search_dropdown_frame.setVisible(False)
+            return
+
+        for city_name in matched:
+            card = SearchCityCard(parent=self.dropdown_scroll_content, city_name=city_name)
+            card.on_select_callback = self.on_dropdown_city_selected
+            self.dropdown_scroll_layout.addWidget(card)
+
+        self.search_dropdown_frame.setVisible(True)
+        self.search_dropdown_frame.raise_()
+
+    def on_dropdown_city_selected(self, city_name):
+        self.selected_search_city = city_name
+        self.search_input.setText(city_name)
+        self.search_dropdown_frame.setVisible(False)
+        self.add_button.setVisible(True)
+
+    def on_add_city(self):
+        if not self.selected_search_city:
+            return
+        if self.left_container_ref:
+            self.left_container_ref.add_city_card(self.selected_search_city)
+        self.search_input.clear()
+        self.add_button.setVisible(False)
+        self.selected_search_city = None
+
+    def _get_cities_list(self):
+        path = os.path.join(os.path.dirname(__file__), "..", "cities.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return [
+                "Kyiv", "Kharkiv", "Odesa", "Dnipro", "Lviv",
+                "Zaporizhzhia", "Mykolaiv", "Vinnytsia", "Poltava",
+                "Chernihiv", "Sumy", "Zhytomyr", "Cherkasy",
+                "Khmelnytskyi", "Rivne", "Ivano-Frankivsk",
+                "London", "Paris", "Berlin", "Warsaw", "Prague",
+                "Tokyo", "Seoul", "New York", "Toronto"
+            ]

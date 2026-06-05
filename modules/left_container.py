@@ -4,7 +4,6 @@ import PyQt6.QtCore as core
 import PyQt6.QtWebEngineWidgets as WebEngine
 from .weather_container import WeatherContainer
 from .cards import Cards 
-from utils import request, json_write
 
 import folium 
 import io
@@ -16,6 +15,7 @@ class LeftContainer(widgets.QFrame):
         self.current_selected_card = None
         self.SWITCH_THEME_TOOGLE = False
         self.weather_container = weather_container
+        self.added_cities = set()
 
         self.setFixedSize(370, 828)
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
@@ -66,55 +66,16 @@ class LeftContainer(widgets.QFrame):
         
         scroll_frame = widgets.QFrame(parent= scroll_area)
         scroll_frame_layout = widgets.QVBoxLayout()
+        self.scroll_frame_layout = scroll_frame_layout
+        self.scroll_frame = scroll_frame
         scroll_frame_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
         scroll_frame_layout.setSpacing(10)
+        self.weather_container.left_container_ref = self
         scroll_frame.setLayout(scroll_frame_layout)
         
         scroll_area.setWidget(scroll_frame)
         
-        cities = [
-            "Kyiv",
-            "Kharkiv",
-            "Odesa",
-            "Dnipro",
-            "Lviv",
-            "Zaporizhzhia",
-            "Kryvyi Rih",
-            "Mykolaiv",
-            "Vinnytsia",
-            "Kherson",
-            "Poltava",
-            "Chernihiv",
-            "Sumy",
-            "Zhytomyr",
-            "Cherkasy",
-            "Khmelnytskyi",
-            "Rivne",
-            "Ivano-Frankivsk",
-            "Ternopil",
-            "Lutsk",
-            "Uzhhorod",
-            "Crimea",
-            "Donetsk",
-            "Luhansk",
-            "Copenhagen",
-            "New York",
-            "Bratislava"
-        ]
-        
-        for city in cities:
-            card = Cards(
-                parent=scroll_frame,
-                city_name=city
-            )
-            def on_card_selected(clicked_card):
-                if self.current_selected_card:
-                    self.current_selected_card.set_selected(False)
-                clicked_card.set_selected(True)
-                self.current_selected_card = clicked_card
-                self.weather_container.update_city(clicked_card.city_name)
-            card.on_select_callback = on_card_selected
-            scroll_frame_layout.addWidget(card)
+
         
         
         # self.open_modal_button = widgets.QPushButton(parent = self, text = "Открыть окно")
@@ -168,3 +129,23 @@ class LeftContainer(widgets.QFrame):
         
         web_engine_view.setHtml(html)
         
+    def add_city_card(self, city_name):
+        if city_name in self.added_cities:
+            for i in range(self.scroll_frame_layout.count()):
+                widget = self.scroll_frame_layout.itemAt(i).widget()
+                if isinstance(widget, Cards) and widget.city_name == city_name:
+                    self._select_card(widget)
+                    return
+            return
+        self.added_cities.add(city_name)
+        card = Cards(parent=self.scroll_frame, city_name=city_name)
+        card.on_select_callback = lambda clicked_card: self._select_card(clicked_card)
+        self.scroll_frame_layout.addWidget(card)
+        self._select_card(card)
+
+    def _select_card(self, card):
+        if self.current_selected_card:
+            self.current_selected_card.set_selected(False)
+        card.set_selected(True)
+        self.current_selected_card = card
+        self.weather_container.update_city(card.city_name)
