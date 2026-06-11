@@ -15,7 +15,7 @@ class ForecastCard(widgets.QFrame):
         self.setFixedSize(60, 82)
         self.setStyleSheet("background: transparent; color: white")
         forecastCard_layout = widgets.QVBoxLayout()
-        forecastCard_layout.setContentsMargins(4,4,4,4)
+        forecastCard_layout.setContentsMargins(0, 0, 0, 0)
         forecastCard_layout.setSpacing(0)
         
         self.time_label = widgets.QLabel(text = "15")
@@ -33,7 +33,7 @@ class ForecastCard(widgets.QFrame):
         forecastCard_layout.addWidget(self.time_label, alignment = core.Qt.AlignmentFlag.AlignHCenter)
         forecastCard_layout.addSpacing(10)
         forecastCard_layout.addWidget(self.image_weather_label, alignment = core.Qt.AlignmentFlag.AlignHCenter)
-        forecastCard_layout.addSpacing(20)
+        forecastCard_layout.addSpacing(10)
         forecastCard_layout.addWidget(self.weather_temp_label, alignment = core.Qt.AlignmentFlag.AlignHCenter)
         
         self.setLayout(forecastCard_layout)
@@ -83,6 +83,41 @@ class ForecastCard(widgets.QFrame):
         if pixmap.isNull():
             pixmap = gui.QPixmap("media/p_weather/p_cloudy_sun.png")
         self.image_weather_label.setPixmap(pixmap.scaled(24, 24, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
+
+class SunCard(widgets.QFrame):
+    def __init__(self, parent, sun_time, sun_type):
+        super().__init__(parent)
+
+        self.setFixedSize(92, 82)
+        self.setStyleSheet("background: transparent; color: white")
+
+        layout = widgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.time_label = widgets.QLabel(text=sun_time)
+        self.time_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 16px; font-weight: 500;")
+        self.time_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+
+        self.image_label = widgets.QLabel()
+        self.image_label.setFixedSize(24, 24)
+        icon_path = "media/title_bar/Sunrise.png" if sun_type == "sunrise" else "media/title_bar/Sunset.png"
+        self.image_label.setPixmap(gui.QPixmap(icon_path).scaled(24, 24, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
+        self.image_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+
+        self.text_label = widgets.QLabel(text="Схід сонця" if sun_type == "sunrise" else "Захід сонця")
+        self.text_label.setFixedSize(90, 20)
+        self.text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 16px; font-weight: 500;")
+        self.text_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        self.text_label.setWordWrap(False)
+
+        layout.addWidget(self.time_label, alignment=core.Qt.AlignmentFlag.AlignHCenter)
+        layout.addSpacing(10)
+        layout.addWidget(self.image_label, alignment=core.Qt.AlignmentFlag.AlignHCenter)
+        layout.addSpacing(10)
+        layout.addWidget(self.text_label, alignment=core.Qt.AlignmentFlag.AlignHCenter)
+
+        self.setLayout(layout)
 
     def update_forecast_city(self, city_name):
         self.city_name = city_name

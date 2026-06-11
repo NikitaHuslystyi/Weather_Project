@@ -6,11 +6,16 @@ from datetime import datetime, timedelta
 import json
 import requests
 import os
+import folium
+import io
+import sys
+import threading
 from utils import request
 from utils import json_write
-from .weather_scroll import ForecastCard
+from .weather_scroll import ForecastCard, SunCard
 from .diagrama import WeatherDiagram
 from .searched_card import SearchCityCard
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 class WeatherContainer(widgets.QFrame):
     def __init__(self, parent):
@@ -62,13 +67,412 @@ class WeatherContainer(widgets.QFrame):
         self.setting_button_frame.setLayout(self.setting_button_layout)
         setting_icon = gui.QIcon("media/title_bar/settings.png")
         self.setting_button.setIcon(setting_icon)
+        self.setting_button_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border: none;}")
         
         self.settings_label = widgets.QLabel(text = "Налаштування")
         self.settings_label.setFixedSize(98, 16)
         self.settings_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 500;")
         self.full_settings_layout.addWidget(self.settings_label, alignment = core.Qt.AlignmentFlag.AlignRight)
         
+        
+        #New task(settings frame)
+        self.whole_settings_frame = widgets.QFrame(self)
+        self.whole_settings_frame.setGeometry(19, 56, 790, 688)
+        self.whole_settings_frame.setStyleSheet("background-color: #363636; border-radius: 10px; border: none;")
+        
+        self.whole_settings_frame.setVisible(False)
+        self.setting_button.clicked.connect(self.show_settings_frame)
+        
+        self.whole_settings_layout = widgets.QVBoxLayout(self.whole_settings_frame)
+        self.whole_settings_layout.setContentsMargins(24, 24, 24, 24)
+        self.whole_settings_layout.setSpacing(0)
+        
+        self.full_settings_string = widgets.QFrame()
+        self.full_settings_string.setFixedSize(742,28)
+        self.full_settings_string.setStyleSheet("background-color: transparent")
+        self.whole_settings_layout.addWidget(self.full_settings_string, alignment = core.Qt.AlignmentFlag.AlignTop)
+        
+        self.whole_settings_string_layout = widgets.QHBoxLayout(self.full_settings_string)
+        self.whole_settings_string_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.settings_text_label = widgets.QLabel(text="Налаштування")
+        self.settings_text_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1); font-size: 24px; font-weight: 500; ")
+        
+        self.close_whole_settings_frame = widgets.QPushButton()
+        self.close_whole_settings_frame.setFixedSize(24,24)
+        self.close_whole_settings_frame.setIconSize(core.QSize(24,24))
+        self.close_whole_settings_frame.setStyleSheet("border: none; background-color: transparent;")
+        close_frame_icon = gui.QIcon("media/title_bar/x.png")
+        self.close_whole_settings_frame.setIcon(close_frame_icon)
+        self.close_whole_settings_frame.clicked.connect(self.whole_settings_frame.close)
+        
+        
+        
+        self.whole_settings_string_layout.addWidget(self.settings_text_label)
+        self.whole_settings_string_layout.addStretch(1)
+        self.whole_settings_string_layout.addWidget(self.close_whole_settings_frame)
+        self.whole_settings_layout.addSpacing(34)
+        
+        
+        self.settings_options_frame = widgets.QFrame()
+        self.settings_options_frame.setFixedSize(742, 578)
+        self.settings_options_frame.setStyleSheet("background-color: transparent; border-radius: 0px; border: 0px;")
+
+        
+        self.settings_options_layout = widgets.QHBoxLayout(self.settings_options_frame)
+        self.settings_options_layout.setContentsMargins(0, 0, 0, 0)
+        self.settings_options_layout.setSpacing(0)
+        
+        self.tabs_frame = widgets.QFrame()
+        self.tabs_frame.setFixedSize(174, 578)
+        self.tabs_frame.setStyleSheet("background-color: transparent; border-right: 1px solid rgba(255, 255, 255, 0.2); border-raidus: 0px")
+        
+        self.settings_options_layout.addWidget(self.tabs_frame, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.settings_options_layout.setSpacing(24)
+        
+        self.tabs_layout = widgets.QVBoxLayout(self.tabs_frame)
+        self.tabs_layout.setContentsMargins(0, 0, 0, 0)
+        self.tabs_layout.setSpacing(0)
+        
+        self.whole_tabs_frame = widgets.QFrame()
+        self.whole_tabs_frame.setFixedSize(158, 140)
+        self.whole_tabs_frame.setStyleSheet("background-color: transparent; border: none; border-radius: 0px")
+        
+        self.tabs_layout.addWidget(self.whole_tabs_frame, alignment = core.Qt.AlignmentFlag.AlignTop)
+        
+        self.whole_tabs_layout = widgets.QVBoxLayout(self.whole_tabs_frame)
+        self.whole_tabs_layout.setContentsMargins(0, 0, 0, 0)
+        self.whole_tabs_layout.setSpacing(0)
+        
+        self.tabs_city_finder_button = widgets.QPushButton()
+        self.tabs_city_finder_button.setFixedSize(158, 35)
+        self.tabs_city_finder_button.setStyleSheet("background-color: transparent; font-size: 16px; font-weight: 400; border: none;")
+        
+        self.tabs_city_finder_button_layout = widgets.QHBoxLayout(self.tabs_city_finder_button)
+        self.tabs_city_finder_button_layout.setContentsMargins(8, 8, 8, 8)
+        
+        self.tabs_city_finder_button_label = widgets.QLabel(text = "Пошук міста")
+        self.tabs_city_finder_button_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1)")
+        
+        self.tabs_city_finder_button_layout.addWidget(self.tabs_city_finder_button_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        
+        self.tabs_app_size_button = widgets.QPushButton()
+        self.tabs_app_size_button.setFixedSize(158, 35)
+        self.tabs_app_size_button.setStyleSheet("background-color: transparent; font-size: 16px; font-weight: 400; border: none;")
+
+        self.tabs_app_size_layout= widgets.QHBoxLayout(self.tabs_app_size_button)
+        self.tabs_app_size_layout.setContentsMargins(8, 8, 8, 8)
+        
+        self.tabs_app_size_label = widgets.QLabel(text = "Розмір додатку")
+        self.tabs_app_size_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1)")
+        
+        self.tabs_app_size_layout.addWidget(self.tabs_app_size_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        self.tabs_app_language_button = widgets.QPushButton()
+        self.tabs_app_language_button.setFixedSize(158, 35)
+        self.tabs_app_language_button.setStyleSheet("background-color: transparent; font-size: 16px; font-weight: 400; border: none;")
+
+        self.tabs_app_language_layout = widgets.QHBoxLayout(self.tabs_app_language_button)
+        self.tabs_app_language_layout.setContentsMargins(8, 8, 8, 8)
+        
+        self.tabs_app_language_label = widgets.QLabel(text = "Пошук міста")
+        self.tabs_app_language_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1)")
+        
+        self.tabs_app_language_layout.addWidget(self.tabs_app_language_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        self.tabs_image_list_button = widgets.QPushButton()
+        self.tabs_image_list_button.setFixedSize(158, 35)
+        self.tabs_image_list_button.setStyleSheet("background-color: transparent; font-size: 16px; font-weight: 400; border: none;")
+        
+        self.tabs_image_list_layout = widgets.QHBoxLayout(self.tabs_image_list_button)
+        self.tabs_image_list_layout.setContentsMargins(8, 8, 8, 8)
+        
+        self.tabs_image_list_label = widgets.QLabel(text = "Списки зображень")
+        self.tabs_image_list_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1)")
+        
+        self.tabs_image_list_layout.addWidget(self.tabs_image_list_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        self.whole_tabs_layout.addWidget(self.tabs_city_finder_button, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.whole_tabs_layout.addWidget(self.tabs_app_size_button, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.whole_tabs_layout.addWidget(self.tabs_app_language_button, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        self.whole_tabs_layout.addWidget(self.tabs_image_list_button, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        self.whole_settings_layout.addWidget(self.settings_options_frame)
+        
+        
+        self.whole_city_finder_frame = widgets.QFrame()
+        self.whole_city_finder_frame.setFixedSize(544, 578)
+        self.whole_city_finder_layout = widgets.QVBoxLayout(self.whole_city_finder_frame)
+        self.whole_city_finder_layout.setContentsMargins(0, 0, 0, 56)
+        self.settings_options_layout.addWidget(self.whole_city_finder_frame)
+        
+        self.city_finder_action_frame = widgets.QFrame()
+        self.city_finder_action_frame.setFixedSize(544, 301)
+        self.whole_city_finder_layout.addWidget(self.city_finder_action_frame)
+        self.whole_city_finder_layout.setSpacing(24)
+        self.city_finder_action_layout = widgets.QHBoxLayout(self.city_finder_action_frame)
+        self.city_finder_action_layout.setContentsMargins(0, 0, 0, 0)
+        
+        
+        
+        self.city_finder_functions_frame = widgets.QFrame()
+        self.city_finder_functions_frame.setFixedSize(239, 301)
+        self.city_finder_action_layout.addWidget(self.city_finder_functions_frame)
+        self.city_finder_action_layout.setSpacing(16)
+        self.city_finder_functions_layout = widgets.QVBoxLayout(self.city_finder_functions_frame)
+        self.city_finder_functions_layout.setContentsMargins(0, 0, 0, 0)
+        self.city_finder_functions_layout.setSpacing(0)
+        
+        #Пошук міста
+        self.city_finder_text_frame = widgets.QFrame()
+        self.city_finder_functions_layout.addWidget(self.city_finder_text_frame, alignment = core.Qt.AlignmentFlag.AlignTop)
+        self.city_finder_text_frame.setFixedSize(239, 21)
+        self.city_finder_text_layout = widgets.QHBoxLayout(self.city_finder_text_frame)
+        self.city_finder_text_layout.setContentsMargins(0, 0, 0, 0)
+        self.city_finder_text_label = widgets.QLabel(text = "Пошук міста")
+        self.city_finder_text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 18px; font-weight: 400")
+        self.city_finder_text_layout.addWidget(self.city_finder_text_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        #Контейнер со всеми функц cвязанные с картой
+        self.map_funcs_frame = widgets.QFrame()
+        self.city_finder_functions_layout.addWidget(self.map_funcs_frame)
+        self.city_finder_functions_layout.setSpacing(24)
+        self.map_funcs_layout = widgets.QVBoxLayout(self.map_funcs_frame)
+        self.map_funcs_layout.setContentsMargins(0, 0, 0, 0)
+        self.map_funcs_frame.setFixedSize(239, 194)
+        
+        
+# КРАЇНА
+        self.country_finder_frame = widgets.QFrame()
+        self.map_funcs_layout.addWidget(self.country_finder_frame, alignment=core.Qt.AlignmentFlag.AlignTop)
+        self.map_funcs_layout.setSpacing(16)
+        self.country_finder_frame.setFixedSize(239, 56)
+        self.country_finder_layout = widgets.QVBoxLayout(self.country_finder_frame)
+        self.country_finder_layout.setContentsMargins(0, 0, 0, 0)
+        self.country_finder_layout.setSpacing(8)
+
+        self.country_text_label = widgets.QLabel(text="Країна")
+        self.country_text_label.setFixedSize(239, 16)
+        self.country_text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 500")
+        self.country_finder_layout.addWidget(self.country_text_label)
+
+        self.country_input_frame = widgets.QFrame()
+        self.country_finder_layout.addWidget(self.country_input_frame)
+        self.country_input_frame.setFixedSize(239, 32)
+        self.country_input_frame.setStyleSheet("background-color: rgba(255, 255, 255, 1); border: none; border-radius: 4px;")
+        country_input_layout = widgets.QHBoxLayout(self.country_input_frame)
+        country_input_layout.setContentsMargins(10, 8, 10, 8)
+        country_input_layout.setSpacing(5)
+
+        self.country_search_input = widgets.QLineEdit()
+        self.country_search_input.setStyleSheet("background-color: transparent; border: none; font-size: 12px; font-weight: 400; color: black;")
+        self.country_search_input.setFixedSize(198, 16)
+        self.country_search_input.setPlaceholderText("Виберіть країну")
+
+        self.down_arrow_label1 = widgets.QLabel()
+        self.down_arrow_label1.setFixedSize(16, 16)
+        self.down_arrow_label1.setPixmap(gui.QPixmap("media/title_bar/chevron-down.png"))
+        self.down_arrow_label1.setStyleSheet("background-color: transparent;")
+
+        country_input_layout.addWidget(self.country_search_input, alignment=core.Qt.AlignmentFlag.AlignLeft)
+        country_input_layout.addWidget(self.down_arrow_label1, alignment=core.Qt.AlignmentFlag.AlignRight)
+
+        # Дропдаун країни
+        self.country_dropdown = widgets.QFrame(self.whole_settings_frame)
+        self.country_dropdown.setFixedSize(239, 200)
+        self.country_dropdown.setStyleSheet("background-color: #363636; border-radius: 6px; border: none;")
+        self.country_dropdown.setVisible(False)
+        country_dd_layout = widgets.QVBoxLayout(self.country_dropdown)
+        country_dd_layout.setContentsMargins(0, 0, 0, 0)
+        country_dd_layout.setSpacing(0)
+        self.country_dd_scroll = widgets.QScrollArea()
+        self.country_dd_scroll.setWidgetResizable(True)
+        self.country_dd_scroll.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.country_dd_scroll.setHorizontalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.country_dd_scroll.setFrameShape(widgets.QFrame.Shape.NoFrame)
+        self.country_dd_scroll.setStyleSheet("background: transparent; border: none;")
+        self.country_dd_content = widgets.QFrame()
+        self.country_dd_content.setStyleSheet("background: transparent; border: none;")
+        self.country_dd_layout = widgets.QVBoxLayout(self.country_dd_content)
+        self.country_dd_layout.setContentsMargins(0, 0, 0, 0)
+        self.country_dd_layout.setSpacing(0)
+        self.country_dd_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.country_dd_scroll.setWidget(self.country_dd_content)
+        country_dd_layout.addWidget(self.country_dd_scroll)
+        self.country_search_input.textChanged.connect(self.on_country_search_changed)
+
+        # МІСТО
+        self.city_finder_frame = widgets.QFrame()
+        self.map_funcs_layout.addWidget(self.city_finder_frame)
+        self.city_finder_frame.setFixedSize(239, 56)
+        self.city_finder_layout = widgets.QVBoxLayout(self.city_finder_frame)
+        self.city_finder_layout.setContentsMargins(0, 0, 0, 0)
+        self.city_finder_layout.setSpacing(8)
+
+        self.city_text_label = widgets.QLabel(text="Місто")
+        self.city_text_label.setFixedSize(239, 16)
+        self.city_text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 500")
+        self.city_finder_layout.addWidget(self.city_text_label)
+
+        self.city_input_frame = widgets.QFrame()
+        self.city_finder_layout.addWidget(self.city_input_frame)
+        self.city_input_frame.setFixedSize(239, 32)
+        self.city_input_frame.setStyleSheet("background-color: rgba(255, 255, 255, 1); border: none; border-radius: 4px;")
+        city_input_layout = widgets.QHBoxLayout(self.city_input_frame)
+        city_input_layout.setContentsMargins(10, 8, 10, 8)
+        city_input_layout.setSpacing(5)
+
+        self.city_search_input = widgets.QLineEdit()
+        self.city_search_input.setStyleSheet("background-color: transparent; border: none; font-size: 12px; font-weight: 400; color: black;")
+        self.city_search_input.setFixedSize(198, 16)
+        self.city_search_input.setPlaceholderText("Виберіть місто")
+
+        self.down_arrow_label2 = widgets.QLabel()
+        self.down_arrow_label2.setFixedSize(16, 16)
+        self.down_arrow_label2.setPixmap(gui.QPixmap("media/title_bar/chevron-down.png"))
+        self.down_arrow_label2.setStyleSheet("background-color: transparent;")
+
+        city_input_layout.addWidget(self.city_search_input, alignment=core.Qt.AlignmentFlag.AlignLeft)
+        city_input_layout.addWidget(self.down_arrow_label2, alignment=core.Qt.AlignmentFlag.AlignRight)
+
+        # Дропдаун міста
+        self.city_dropdown = widgets.QFrame(self.whole_settings_frame)
+        self.city_dropdown.setFixedSize(239, 200)
+        self.city_dropdown.setStyleSheet("background-color: #363636; border-radius: 6px; border: none;")
+        self.city_dropdown.setVisible(False)
+        city_dd_layout = widgets.QVBoxLayout(self.city_dropdown)
+        city_dd_layout.setContentsMargins(0, 0, 0, 0)
+        city_dd_layout.setSpacing(0)
+        self.city_dd_scroll = widgets.QScrollArea()
+        self.city_dd_scroll.setWidgetResizable(True)
+        self.city_dd_scroll.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.city_dd_scroll.setHorizontalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.city_dd_scroll.setFrameShape(widgets.QFrame.Shape.NoFrame)
+        self.city_dd_scroll.setStyleSheet("background: transparent; border: none;")
+        self.city_dd_content = widgets.QFrame()
+        self.city_dd_content.setStyleSheet("background: transparent; border: none;")
+        self.city_dd_layout = widgets.QVBoxLayout(self.city_dd_content)
+        self.city_dd_layout.setContentsMargins(0, 0, 0, 0)
+        self.city_dd_layout.setSpacing(0)
+        self.city_dd_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.city_dd_scroll.setWidget(self.city_dd_content)
+        city_dd_layout.addWidget(self.city_dd_scroll)
+        self.city_search_input.textChanged.connect(self.on_city_search_changed)
+
+        self.selected_settings_country = None
+        self.selected_settings_city = None
+
+        #Координати
+        self.coord_finder_frame = widgets.QFrame()
+        self.map_funcs_layout.addWidget(self.coord_finder_frame)
+        self.coord_finder_frame.setFixedSize(239, 56)
+        self.coord_finder_layout = widgets.QVBoxLayout(self.coord_finder_frame)
+        self.coord_finder_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.coord_text_label = widgets.QLabel(text = "Координати")
+        self.coord_text_label.setFixedSize(239, 16)
+        self.coord_text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 500 ")
+        self.coord_finder_layout.addWidget(self.coord_text_label)
+        self.coord_finder_layout.setSpacing(8)
+        
+        self.coord_find_input_frame = widgets.QFrame()
+        self.coord_finder_layout.addWidget(self.coord_find_input_frame)
+        self.coord_find_input_frame.setFixedSize(239, 32)
+        self.coord_find_input_frame.setStyleSheet("background-color: rgba(255, 255, 255, 1); border: none; border-radius: 4px;")
+        self.coord_find_input_layout = widgets.QHBoxLayout()
+        self.coord_find_input_layout.setContentsMargins(10, 8, 10, 8)
+        self.coord_find_input_frame.setLayout(self.coord_find_input_layout)
+        
+        
+        self.coord_search_input = widgets.QLineEdit()
+        self.coord_search_input.setStyleSheet("background-color: transparent; border: none; font-size: 12px; font-weight: 400; color: black;")
+        self.coord_search_input.setFixedSize(219, 16)
+        self.coord_search_input.setPlaceholderText("(WGS 84,UTM,MGRS)")
+        
+        
+        self.coord_find_input_layout.addWidget(self.coord_search_input, alignment = core.Qt.AlignmentFlag.AlignCenter)
+        
+        #Кнопка Зберегти
+        save_button_frame = widgets.QFrame()
+        save_button_frame.setFixedSize(105, 38)
+        save_button_frame.setStyleSheet("background-color: #2b2b2b; border-radius: 4px")
+        save_button_layout = widgets.QHBoxLayout(save_button_frame)
+        save_button_layout.setContentsMargins(16, 8, 16, 8)
+        
+        save_button = widgets.QPushButton(text = "Зберегти")
+        save_button.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400")
+        save_button_layout.addWidget(save_button)
+        save_button.clicked.connect(self.on_settings_save)
+        
+        self.city_finder_functions_layout.addWidget(save_button_frame)
+        
+        
+        self.map_frame = widgets.QFrame()
+        self.map_frame.setFixedSize(289, 301)
+        self.map_frame.setStyleSheet("background-color: transparent; border-radius: 4px; border: none;")
+        self.city_finder_action_layout.addWidget(self.map_frame)
+        self.map_layout = widgets.QVBoxLayout(self.map_frame)
+        self.map_layout.setContentsMargins(0, 45, 0, 0)
+        
+        self.web_view = QWebEngineView()
+        self.web_view.setStyleSheet("background-color: transparent; border: none; border-radius: 4px;")
+        map = folium.Map(width = 289, height = 256,location = [50, 50], tiles = "CartoDB Positron")
+        data = io.BytesIO()
+        map.save(data, close_file = False)
+        html = data.getvalue().decode()
+        self.web_view.setHtml(html)
+        
+        self.map_layout.addWidget(self.web_view)
+
+        #Фрейм(Додані міста)
+        self.added_cities_frame = widgets.QFrame()
+        self.added_cities_frame.setFixedSize(544, 197)
+        self.added_cities_layout = widgets.QVBoxLayout(self.added_cities_frame)
+        self.added_cities_layout.setContentsMargins(0, 0, 0, 0)
+        
+        #Текст Додані міста
+        self.added_cities_text_frame = widgets.QFrame()
+        self.added_cities_layout.addWidget(self.added_cities_text_frame, alignment =core.Qt.AlignmentFlag.AlignTop)
+        self.added_cities_text_frame.setFixedSize(544, 21)
+        self.added_cities_text_frame.setStyleSheet("background-color: transparent;")
+        self.added_cities_text_layout = widgets.QHBoxLayout(self.added_cities_text_frame)
+        self.added_cities_text_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.added_cities_text_label = widgets.QLabel(text = "Додані міста")
+        self.added_cities_text_label.setStyleSheet("background-color: transparent; color: rgba(255, 255, 255, 1); font-size: 18px; font-weight: 400")
+        self.added_cities_text_layout.addWidget(self.added_cities_text_label, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        #Фрейм та скрол доданих міст
+        # Скрол доданих міст
+        self.added_cities_scroll_area = widgets.QScrollArea()
+        self.added_cities_scroll_area.setFixedSize(544, 160)
+        self.added_cities_scroll_area.setWidgetResizable(True)
+        self.added_cities_scroll_area.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.added_cities_scroll_area.setHorizontalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.added_cities_scroll_area.setFrameShape(widgets.QFrame.Shape.NoFrame)
+        self.added_cities_scroll_area.setStyleSheet("background: #2b2b2b; border-radius: 6px; border: none;")
+
+        self.added_cities_scroll_content = widgets.QFrame()
+        self.added_cities_scroll_content.setStyleSheet("background: transparent; border: none;")
+        self.added_cities_scroll_layout = widgets.QVBoxLayout(self.added_cities_scroll_content)
+        self.added_cities_scroll_layout.setContentsMargins(16, 8, 16, 8)
+        self.added_cities_scroll_layout.setSpacing(0)
+        self.added_cities_scroll_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+
+        self.added_cities_scroll_area.setWidget(self.added_cities_scroll_content)
+        self.added_cities_layout.addWidget(self.added_cities_scroll_area)
+        
+        
+        
+        
+        
+        self.whole_city_finder_layout.addWidget(self.added_cities_frame)
+        
         self.top_layout.addWidget(self.full_settings_frame, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        
+        
+        
         
         self.full_searching_frame = widgets.QFrame()
         self.full_searching_frame.setFixedSize(261, 36)
@@ -138,7 +542,7 @@ class WeatherContainer(widgets.QFrame):
         # Dropdown фрейм
         self.search_dropdown_frame = widgets.QFrame(self)
         self.search_dropdown_frame.setGeometry(547, 56, 261, 200)
-        self.search_dropdown_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border: none;}")
+        self.search_dropdown_frame.setStyleSheet("background-color: #363636; border-radius: 10px; border: none;")
         self.search_dropdown_frame.setVisible(False)
 
         dropdown_main_layout = widgets.QVBoxLayout(self.search_dropdown_frame)
@@ -484,11 +888,7 @@ class WeatherContainer(widgets.QFrame):
         self.scroll_controls_layout.addWidget(self.next_button, alignment=core.Qt.AlignmentFlag.AlignVCenter)
         self.information_weather_layout2.addWidget(self.scroll_controls_frame)
         
-        self.forecast_cards = []
-        for i in range(12):
-            forecast_card = ForecastCard(parent=self.scroll_content, city_name=self.city_name)
-            self.forecast_cards.append(forecast_card)
-            self.scroll_layout.addWidget(forecast_card)
+
         
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.forecast_weather_frame)
         self.WEATHER_CONTEINER_LAYOUT.addSpacing(5)
@@ -603,10 +1003,13 @@ class WeatherContainer(widgets.QFrame):
         self.CENTRAL_LAYOUT.addWidget(self.weather_right_frame)
         
         self.watch_timezone_offset = 0
-        
+
+        self.whole_settings_frame.raise_()
+
         self.time_timer = core.QTimer(self)
         self.time_timer.timeout.connect(self.update_watch_time)
         self.time_timer.start(10000)
+        
         
     def update_city(self, city_name):
         self.city_name = city_name
@@ -674,15 +1077,42 @@ class WeatherContainer(widgets.QFrame):
 
         forecast_list = forecast_data.get("list", [])
         timezone_offset = forecast_data.get("city", {}).get("timezone", 0)
-        self.weather_diagram.update_forecast(forecast_list)
-        visible_count = min(len(forecast_list), len(self.forecast_cards))
+        sunrise_ts = forecast_data.get("city", {}).get("sunrise", 0)
+        sunset_ts = forecast_data.get("city", {}).get("sunset", 0)
 
-        for index, forecast_card in enumerate(self.forecast_cards):
-            if index < visible_count:
-                forecast_card.update_forecast_item(forecast_list[index], timezone_offset, index)
-                forecast_card.setVisible(True)
-            else:
-                forecast_card.setVisible(False)
+        self.weather_diagram.update_forecast(forecast_list)
+        
+        while self.scroll_layout.count():
+            item = self.scroll_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        sunrise_local = datetime.utcfromtimestamp(sunrise_ts + timezone_offset)
+        sunset_local = datetime.utcfromtimestamp(sunset_ts + timezone_offset)
+        sunrise_str = sunrise_local.strftime("%H:%M")
+        sunset_str = sunset_local.strftime("%H:%M")
+
+        sunrise_inserted = False
+        sunset_inserted = False
+
+        for index, forecast_item in enumerate(forecast_list[:12]):
+            dt_ts = forecast_item.get("dt", 0)
+            local_ts = dt_ts + timezone_offset
+            dt_local = datetime.utcfromtimestamp(local_ts)
+
+            if not sunrise_inserted and dt_local.time() >= sunrise_local.time():
+                sun_card = SunCard(parent=self.scroll_content, sun_time=sunrise_str, sun_type="sunrise")
+                self.scroll_layout.addWidget(sun_card)
+                sunrise_inserted = True
+
+            if not sunset_inserted and dt_local.time() >= sunset_local.time():
+                sun_card = SunCard(parent=self.scroll_content, sun_time=sunset_str, sun_type="sunset")
+                self.scroll_layout.addWidget(sun_card)
+                sunset_inserted = True
+
+            card = ForecastCard(parent=self.scroll_content, city_name=self.city_name)
+            card.update_forecast_item(forecast_item, timezone_offset, index)
+            self.scroll_layout.addWidget(card)
         
     def clear_search_field(self):
         self.search_input.clear()
@@ -691,15 +1121,20 @@ class WeatherContainer(widgets.QFrame):
     def load_cities(self):
         response = requests.get("https://countriesnow.space/api/v0.1/countries")
         data = response.json()
-        cities = []
+        result = []
         for country in data["data"]:
-            cities.extend(country["cities"])
-        cities = sorted(set(cities))
-        path = os.path.join(os.path.dirname(__file__), "..", "cities.json")
+            for city in country["cities"]:
+                result.append({
+                    "city": city,
+                    "country": country["country"]
+                })
+        result = sorted(result, key=lambda x: x["city"])
+        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as file:
-            json.dump(cities, file, ensure_ascii=False, indent=4)
-        print(f"Збережено {len(cities)} міст")
-        return cities
+            json.dump(result, file, ensure_ascii=False, indent=4)
+        print(f"Збережено {len(result)} міст")
+        return result
 
     def on_search_text_changed(self, text):
         text = text.strip()
@@ -709,10 +1144,9 @@ class WeatherContainer(widgets.QFrame):
             self.selected_search_city = None
             return
 
-        cities = self._get_cities_list()
-        matched = [c for c in cities if c.lower().startswith(text.lower())][:15]
+        all_cities = self._get_cities_list()
+        matched = [c for c in all_cities if c["city"].lower().startswith(text.lower())][:15]
 
-        # Очищаем старые карточки
         while self.dropdown_scroll_layout.count():
             item = self.dropdown_scroll_layout.takeAt(0)
             if item.widget():
@@ -722,8 +1156,12 @@ class WeatherContainer(widgets.QFrame):
             self.search_dropdown_frame.setVisible(False)
             return
 
-        for city_name in matched:
-            card = SearchCityCard(parent=self.dropdown_scroll_content, city_name=city_name)
+        for item in matched:
+            card = SearchCityCard(
+                parent=self.dropdown_scroll_content,
+                city_name=item["city"],
+                country_name=item["country"]
+            )
             card.on_select_callback = self.on_dropdown_city_selected
             self.dropdown_scroll_layout.addWidget(card)
 
@@ -746,16 +1184,227 @@ class WeatherContainer(widgets.QFrame):
         self.selected_search_city = None
 
     def _get_cities_list(self):
-        path = os.path.join(os.path.dirname(__file__), "..", "cities.json")
+        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
         try:
             with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+            # Перевірка формату — якщо старий (список рядків) перезавантажуємо
+            if data and isinstance(data[0], str):
+                return self.load_cities()
+            return data
         except Exception:
             return [
-                "Kyiv", "Kharkiv", "Odesa", "Dnipro", "Lviv",
-                "Zaporizhzhia", "Mykolaiv", "Vinnytsia", "Poltava",
-                "Chernihiv", "Sumy", "Zhytomyr", "Cherkasy",
-                "Khmelnytskyi", "Rivne", "Ivano-Frankivsk",
-                "London", "Paris", "Berlin", "Warsaw", "Prague",
-                "Tokyo", "Seoul", "New York", "Toronto"
+                {"city": "Kyiv", "country": "Ukraine"},
+                {"city": "Kharkiv", "country": "Ukraine"},
+                {"city": "London", "country": "United Kingdom"},
+                {"city": "Berlin", "country": "Germany"},
+                {"city": "Paris", "country": "France"},
             ]
+    
+    def show_settings_frame(self):
+        self.whole_settings_frame.setVisible(True)
+        self.whole_settings_frame.raise_()
+    
+    def on_country_search_changed(self, text):
+        text = text.strip()
+        while self.country_dd_layout.count():
+            item = self.country_dd_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if not text:
+            self.country_dropdown.setVisible(False)
+            return
+
+        all_data = self._get_cities_list()
+        countries = sorted(set(c["country"] for c in all_data))
+        matched = [c for c in countries if c.lower().startswith(text.lower())][:15]
+
+        if not matched:
+            self.country_dropdown.setVisible(False)
+            return
+
+        for country in matched:
+            card = self._make_settings_dd_card(country, self.country_dd_content, lambda c: self.on_country_selected(c))
+            self.country_dd_layout.addWidget(card)
+
+        # Позиціонуємо дропдаун відносно country_input_frame
+        pos = self.country_input_frame.mapTo(self.whole_settings_frame, core.QPoint(0, 32))
+        self.country_dropdown.move(pos)
+        self.country_dropdown.setVisible(True)
+        self.country_dropdown.raise_()
+
+    def on_country_selected(self, country_name):
+        self.selected_settings_country = country_name
+        self.country_search_input.setText(country_name)
+        self.country_dropdown.setVisible(False)
+        self.city_search_input.clear()
+        self.selected_settings_city = None
+
+    def on_city_search_changed(self, text):
+        text = text.strip()
+        while self.city_dd_layout.count():
+            item = self.city_dd_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if not text:
+            self.city_dropdown.setVisible(False)
+            return
+
+        all_data = self._get_cities_list()
+
+        if self.selected_settings_country:
+            filtered = [c for c in all_data if c["country"] == self.selected_settings_country]
+        else:
+            filtered = all_data
+
+        matched = [c for c in filtered if c["city"].lower().startswith(text.lower())][:15]
+
+        if not matched:
+            self.city_dropdown.setVisible(False)
+            return
+
+        for item in matched:
+            label = f"{item['city']}"
+            card = self._make_settings_dd_card(label, self.city_dd_content, lambda c: self.on_settings_city_selected(c))
+            self.city_dd_layout.addWidget(card)
+
+        pos = self.city_input_frame.mapTo(self.whole_settings_frame, core.QPoint(0, 32))
+        self.city_dropdown.move(pos)
+        self.city_dropdown.setVisible(True)
+        self.city_dropdown.raise_()
+
+    def on_settings_city_selected(self, city_name):
+        self.selected_settings_city = city_name
+        self.city_search_input.setText(city_name)
+        self.city_dropdown.setVisible(False)
+
+    def _make_settings_dd_card(self, text, parent, callback):
+        card = widgets.QFrame(parent)
+        card.setFixedSize(239, 32)
+        card.setStyleSheet("background: transparent; border: none;")
+        card.setCursor(core.Qt.CursorShape.PointingHandCursor)
+        layout = widgets.QHBoxLayout(card)
+        layout.setContentsMargins(8, 4, 8, 4)
+        label = widgets.QLabel(text)
+        label.setStyleSheet("color: rgba(255,255,255,1); font-size: 13px; background: transparent; border: none;")
+        layout.addWidget(label)
+
+        def press(event, t=text):
+            callback(t)
+        card.mousePressEvent = press
+        return card
+    def on_settings_save(self):
+        city = self.selected_settings_city
+        if not city:
+            return
+
+        # Додаємо в лівий контейнер
+        if self.left_container_ref:
+            self.left_container_ref.add_city_card(city)
+
+        # Додаємо карточку в скрол доданих міст
+        self._add_to_added_cities_scroll(city)
+
+        # Оновлюємо мінімапу
+        self._update_minimap(city)
+
+        # Скидаємо поля
+        self.country_search_input.clear()
+        self.city_search_input.clear()
+        self.selected_settings_country = None
+        self.selected_settings_city = None
+
+    def _add_to_added_cities_scroll(self, city_name):
+        # Перевіряємо чи вже є
+        for i in range(self.added_cities_scroll_layout.count()):
+            w = self.added_cities_scroll_layout.itemAt(i).widget()
+            if w and w.property("city_name") == city_name:
+                return
+
+        card = widgets.QFrame()
+        card.setFixedSize(512, 32)
+        card.setProperty("city_name", city_name)
+        card.setStyleSheet("background: transparent; border: none;")
+        card_layout = widgets.QHBoxLayout(card)
+        card_layout.setContentsMargins(0, 0, 0, 0)
+        card_layout.setSpacing(0)
+
+        city_label = widgets.QLabel(city_name)
+        city_label.setStyleSheet("color: rgba(255,255,255,1); font-size: 14px; font-weight: 400; background: transparent; border: none;")
+        card_layout.addWidget(city_label)
+        card_layout.addStretch()
+
+        delete_btn = widgets.QPushButton()
+        delete_btn.setFixedSize(16, 16)
+        delete_btn.setStyleSheet("background: transparent; border: none;")
+        delete_btn.setIcon(gui.QIcon("media/title_bar/trash.png"))
+        delete_btn.setIconSize(core.QSize(16, 16))
+        delete_btn.setCursor(core.Qt.CursorShape.PointingHandCursor)
+        delete_btn.clicked.connect(lambda checked, c=city_name, w=card: self._remove_city(c, w))
+        card_layout.addWidget(delete_btn)
+
+        self.added_cities_scroll_layout.addWidget(card)
+
+    def _remove_city(self, city_name, card_widget):
+        # Видаляємо з скролу налаштувань
+        card_widget.deleteLater()
+
+        # Видаляємо з лівого контейнера
+        if self.left_container_ref:
+            self.left_container_ref.remove_city_card(city_name)
+
+    def _update_minimap(self, city_name):
+        try:
+            data = request(city_name=city_name, request_type="current_weather")
+            lat = data["coord"]["lat"]
+            lon = data["coord"]["lon"]
+            
+            # Записуємо координати в поле
+            self.coord_search_input.setText(f"{lat}, {lon}")
+            
+            m = folium.Map(width=289, height=256, location=[lat, lon], zoom_start=10, tiles="CartoDB Positron")
+            folium.Marker([lat, lon], tooltip=city_name).add_to(m)
+            buf = io.BytesIO()
+            m.save(buf, close_file=False)
+            self.web_view.setHtml(buf.getvalue().decode())
+        except Exception:
+            pass
+
+    def _ensure_cities_loaded(self):
+        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
+        needs_reload = False
+        if not os.path.exists(path):
+            needs_reload = True
+        else:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if data and isinstance(data[0], str):
+                    needs_reload = True
+                    print("Старий формат, перегенеруємо...")
+            except Exception:
+                needs_reload = True
+        if needs_reload:
+            print("Завантажуємо міста у фоні...")
+            thread = threading.Thread(target=self.load_cities, daemon=True)
+            thread.start()
+
+    def on_add_city(self):
+        if not self.selected_search_city:
+            return
+        if self.left_container_ref:
+            self.left_container_ref.add_city_card(self.selected_search_city)
+        # Синхронізуємо з скролом доданих міст в налаштуваннях
+        self._add_to_added_cities_scroll(self.selected_search_city)
+        self.search_input.clear()
+        self.add_button.setVisible(False)
+        self.selected_search_city = None
+
+    def _remove_from_added_cities_scroll(self, city_name):
+        for i in range(self.added_cities_scroll_layout.count()):
+            w = self.added_cities_scroll_layout.itemAt(i).widget()
+            if w and w.property("city_name") == city_name:
+                w.deleteLater()
+                break

@@ -1,46 +1,44 @@
 {
     "coord": {
-        "lon": -74.006,
-        "lat": 40.7143
+        "lon": 44.49,
+        "lat": 40.0075
     },
     "weather": [
         {
-            "id": 804,
+            "id": 802,
             "main": "Clouds",
-            "description": "хмарно",
-            "icon": "04d"
+            "description": "уривчасті хмари",
+            "icon": "03d"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 30.38,
-        "feels_like": 29.19,
-        "temp_min": 28.86,
-        "temp_max": 32.12,
-        "pressure": 1015,
-        "humidity": 31,
-        "sea_level": 1015,
-        "grnd_level": 1014
+        "temp": 31.22,
+        "feels_like": 29.87,
+        "temp_min": 31.22,
+        "temp_max": 31.22,
+        "pressure": 1006,
+        "humidity": 29,
+        "sea_level": 1006,
+        "grnd_level": 912
     },
     "visibility": 10000,
     "wind": {
-        "speed": 0.89,
-        "deg": 20,
-        "gust": 1.79
+        "speed": 3.36,
+        "deg": 156,
+        "gust": 3.42
     },
     "clouds": {
-        "all": 98
+        "all": 45
     },
-    "dt": 1780676702,
+    "dt": 1781178811,
     "sys": {
-        "type": 2,
-        "id": 2009754,
-        "country": "US",
-        "sunrise": 1780651547,
-        "sunset": 1780705414
+        "country": "AM",
+        "sunrise": 1781141573,
+        "sunset": 1781195435
     },
-    "timezone": -14400,
-    "id": 5128581,
-    "name": "New York",
+    "timezone": 14400,
+    "id": 866135,
+    "name": "Dimitrov",
     "cod": 200
 }

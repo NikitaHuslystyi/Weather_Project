@@ -149,3 +149,17 @@ class LeftContainer(widgets.QFrame):
         card.set_selected(True)
         self.current_selected_card = card
         self.weather_container.update_city(card.city_name)
+
+    def remove_city_card(self, city_name):
+        if city_name in self.added_cities:
+            self.added_cities.discard(city_name)
+
+        for i in range(self.scroll_frame_layout.count()):
+            widget = self.scroll_frame_layout.itemAt(i).widget()
+            if isinstance(widget, Cards) and widget.city_name == city_name:
+                if self.current_selected_card == widget:
+                    self.current_selected_card = None
+                widget.deleteLater()
+                break
+        # Синхронізуємо з скролом в налаштуваннях
+        self.weather_container._remove_from_added_cities_scroll(city_name)
