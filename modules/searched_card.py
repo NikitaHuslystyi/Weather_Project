@@ -4,10 +4,11 @@ import PyQt6.QtGui as gui
 
 
 class SearchCityCard(widgets.QFrame):
-    def __init__(self, parent, city_name, country_name=""):
+    def __init__(self, parent, city_name, country_name="", display_name=None):
         super().__init__(parent)
 
         self.city_name = city_name
+        self.display_name = display_name or city_name
         self.on_select_callback = None
         self.setFixedSize(261, 32)
 
@@ -15,7 +16,7 @@ class SearchCityCard(widgets.QFrame):
         searched_card_layout.setContentsMargins(8, 4, 8, 4)
         searched_card_layout.setSpacing(6)
 
-        city_label = widgets.QLabel(city_name)
+        city_label = widgets.QLabel(self.display_name)
         city_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400; border: none; background: transparent;")
         searched_card_layout.addWidget(city_label)
 

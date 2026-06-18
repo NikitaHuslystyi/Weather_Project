@@ -87,5 +87,3 @@ class WeatherDiagram:
             else:
                 self.bar_frames[index].setVisible(False)
                 self.weather_image_labels[index].setVisible(False)
-
-

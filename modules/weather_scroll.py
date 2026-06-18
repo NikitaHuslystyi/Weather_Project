@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from utils import request
 from utils import json_write
 
-
 class ForecastCard(widgets.QFrame):
     def __init__(self, parent, city_name):
         super().__init__(parent)
@@ -38,7 +37,7 @@ class ForecastCard(widgets.QFrame):
         
         self.setLayout(forecastCard_layout)
 
-    def update_forecast_item(self, forecast_item, timezone_offset=0, index=0):
+    def update_forecast_item(self, forecast_item, timezone_offset=0, index=0, lang="ua"):
         self.timezone_offset = timezone_offset
 
         dt_ts = forecast_item.get("dt", 0)
@@ -46,7 +45,7 @@ class ForecastCard(widgets.QFrame):
         dt_local = datetime.utcfromtimestamp(local_ts)
         
         if index == 0:
-            self.time_label.setText("Зараз")
+            self.time_label.setText("Зараз" if lang == "ua" else "Now")
         else:
             self.time_label.setText(dt_local.strftime("%H"))
 
@@ -84,8 +83,9 @@ class ForecastCard(widgets.QFrame):
             pixmap = gui.QPixmap("media/p_weather/p_cloudy_sun.png")
         self.image_weather_label.setPixmap(pixmap.scaled(24, 24, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
 
+
 class SunCard(widgets.QFrame):
-    def __init__(self, parent, sun_time, sun_type):
+    def __init__(self, parent, sun_time, sun_type, lang="ua"):
         super().__init__(parent)
 
         self.setFixedSize(92, 82)
@@ -105,7 +105,12 @@ class SunCard(widgets.QFrame):
         self.image_label.setPixmap(gui.QPixmap(icon_path).scaled(24, 24, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
         self.image_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
 
-        self.text_label = widgets.QLabel(text="Схід сонця" if sun_type == "sunrise" else "Захід сонця")
+        if lang == "ua":
+            label_text = "Схід сонця" if sun_type == "sunrise" else "Захід сонця"
+        else:
+            label_text = "Sunrise" if sun_type == "sunrise" else "Sunset"
+
+        self.text_label = widgets.QLabel(text=label_text)
         self.text_label.setFixedSize(90, 20)
         self.text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 16px; font-weight: 500;")
         self.text_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
@@ -116,7 +121,6 @@ class SunCard(widgets.QFrame):
         layout.addWidget(self.image_label, alignment=core.Qt.AlignmentFlag.AlignHCenter)
         layout.addSpacing(10)
         layout.addWidget(self.text_label, alignment=core.Qt.AlignmentFlag.AlignHCenter)
-
         self.setLayout(layout)
 
     def update_forecast_city(self, city_name):
@@ -126,4 +130,3 @@ class SunCard(widgets.QFrame):
     def refresh_forecast_data(self):
         forecast_data = request(city_name=self.city_name, request_type="daily_forecast")
         return forecast_data
-        

@@ -1,44 +1,44 @@
 {
     "coord": {
-        "lon": 44.49,
-        "lat": 40.0075
+        "lon": 34.9833,
+        "lat": 48.45
     },
     "weather": [
         {
-            "id": 802,
+            "id": 804,
             "main": "Clouds",
-            "description": "уривчасті хмари",
-            "icon": "03d"
+            "description": "хмарно",
+            "icon": "04d"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 31.22,
-        "feels_like": 29.87,
-        "temp_min": 31.22,
-        "temp_max": 31.22,
-        "pressure": 1006,
-        "humidity": 29,
-        "sea_level": 1006,
-        "grnd_level": 912
+        "temp": 22.75,
+        "feels_like": 22.23,
+        "temp_min": 22.75,
+        "temp_max": 22.75,
+        "pressure": 1016,
+        "humidity": 44,
+        "sea_level": 1016,
+        "grnd_level": 1005
     },
     "visibility": 10000,
     "wind": {
-        "speed": 3.36,
-        "deg": 156,
-        "gust": 3.42
+        "speed": 2.52,
+        "deg": 14,
+        "gust": 4.47
     },
     "clouds": {
-        "all": 45
+        "all": 99
     },
-    "dt": 1781178811,
+    "dt": 1781789969,
     "sys": {
-        "country": "AM",
-        "sunrise": 1781141573,
-        "sunset": 1781195435
+        "country": "UA",
+        "sunrise": 1781746676,
+        "sunset": 1781804662
     },
-    "timezone": 14400,
-    "id": 866135,
-    "name": "Dimitrov",
+    "timezone": 10800,
+    "id": 709930,
+    "name": "Dnipro",
     "cod": 200
 }

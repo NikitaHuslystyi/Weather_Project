@@ -5,13 +5,15 @@ from datetime import datetime, timedelta
 from utils import request
 from utils import json_write
 
+
 class Cards(widgets.QFrame):
-    def __init__(self, parent, city_name):
+    def __init__(self, parent, city_name, weather_container=None):
         super().__init__(parent)
         self.city_name = city_name
         self.selected = False
         self.on_select_callback = None
-        
+        self.weather_container = weather_container
+
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); background: transparent; border-radius: 0px; border-bottom: 1px solid rgba(255, 255, 255, 0.2)")
         self.setFixedSize(330, 90)
         card_frame_layout = widgets.QHBoxLayout()
@@ -23,7 +25,8 @@ class Cards(widgets.QFrame):
         left_frame = widgets.QFrame()
         left_frame.setFixedSize(180, 90)
         
-        self.left_label1 = widgets.QLabel(text = city_name)
+        display_name = self._get_display_name(city_name)
+        self.left_label1 = widgets.QLabel(text = display_name)
         self.left_label1.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 24px; font-weight: 500;")
         self.left_label2 = widgets.QLabel(text = "")
         self.left_label2.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 500;")
@@ -94,8 +97,6 @@ class Cards(widgets.QFrame):
         card_frame_layout.addStretch(1)
         card_frame_layout.addWidget(right_frame, alignment = core.Qt.AlignmentFlag.AlignRight)
 
-
-
         self.timezone_offset = 0
 
         self.update_timer = core.QTimer(self)
@@ -109,15 +110,27 @@ class Cards(widgets.QFrame):
         self.refresh_weather1()
         self.update_local_time()
 
+    def _get_display_name(self, city_name):
+        if self.weather_container:
+            return self.weather_container._get_city_display_name(city_name, self.weather_container.current_language)
+        return city_name
+
     def refresh_weather1(self):
-        weather_data = request(city_name=self.city_name, request_type="current_weather")
+        lang = "uk"
+        if self.weather_container:
+            lang = "uk" if self.weather_container.current_language == "ua" else "en"
+        weather_data = request(city_name=self.city_name, request_type="current_weather", lang=lang)
         json_write("weather.json", weather_data)
 
-        self.left_label1.setText(weather_data['name'])
+        display_name = self._get_display_name(self.city_name)
+        self.left_label1.setText(display_name)
         self.timezone_offset = weather_data['timezone']
         self.left_label3.setText(weather_data['weather'][0]['description'].capitalize())
         self.right_label1.setText(f"{int(weather_data['main']['temp'])}°")
-        self.right_label2.setText(f"Макс.:{int(weather_data['main']['temp_max'])}°, мін.:{int(weather_data['main']['temp_min'])}°")
+
+        max_lbl = self.weather_container._t("max_label") if self.weather_container else "Макс."
+        min_lbl = self.weather_container._t("min_label") if self.weather_container else "мін."
+        self.right_label2.setText(f"{max_lbl}.:{int(weather_data['main']['temp_max'])}°, {min_lbl}.:{int(weather_data['main']['temp_min'])}°")
         self.update_local_time()
 
     def update_local_time(self):
@@ -144,3 +157,6 @@ class Cards(widgets.QFrame):
                 border-radius: 0px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             """)
+
+    def update_language(self):
+        self.refresh_weather1()

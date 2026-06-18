@@ -1,0 +1,37 @@
+[
+    {
+        "name": "Kiev",
+        "uk": "Київ",
+        "en": "Kyiv"
+    },
+    {
+        "name": "Dnipropetrovsk",
+        "uk": "Дніпро",
+        "en": "Dnipro"
+    },
+    {
+        "name": "New York",
+        "uk": "Нью-Йорк",
+        "en": "New York"
+    },
+    {
+        "name": "Lviv",
+        "uk": "Львів",
+        "en": "Lviv"
+    },
+    {
+        "name": "Kharkiv",
+        "uk": "Харків",
+        "en": "Kharkiv"
+    },
+    {
+        "name": "Kiedrich",
+        "uk": "Kiedrich",
+        "en": "Kiedrich"
+    },
+    {
+        "name": "Dnipro",
+        "uk": "Дніпро",
+        "en": "Dnipro"
+    }
+]
