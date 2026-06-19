@@ -1,0 +1,38 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+build/
+dist/
+
+# --- Виртуальное окружение ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Конфиги с секретами ---
+config.py
+.env
+
+# --- Кэш данных, который пишет приложение ---
+json/cities.json
+json/translate.json
+forecast.json
+current.json
+geocoding.json
+
+# --- IDE / редакторы ---
+.vscode/
+.idea/
+*.swp
+
+# --- ОС-мусор ---
+.DS_Store
+Thumbs.db
+
+# --- PyQt/прочее ---
+*.log

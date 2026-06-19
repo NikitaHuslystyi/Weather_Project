@@ -14,8 +14,8 @@ class LeftContainer(widgets.QFrame):
         self.header = header
         self.added_cities = set()
 
-        self.setFixedSize(370, 828)
-        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
+        self.setFixedSize(370, 800)
+        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2); border-bottom-left-radius: 20px;")
         
         self.LAYOUT = widgets.QVBoxLayout()
         self.LAYOUT.addSpacing(0)
@@ -60,6 +60,8 @@ class LeftContainer(widgets.QFrame):
         
         scroll_area.setWidgetResizable(True)
         scroll_area.setVerticalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(core.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
         scroll_area.setFrameShape(widgets.QFrame.Shape.NoFrame)
         self.LAYOUT.addWidget(scroll_area)
         
@@ -109,7 +111,7 @@ class LeftContainer(widgets.QFrame):
                     was_selected = True
                 widget.deleteLater()
                 break
-        self.weather_container._remove_from_added_cities_scroll(city_name)
+        self.weather_container.settings_modal.remove_city_from_list(city_name)
 
         if was_selected:
             self.weather_container.clear_weather_display()
@@ -122,6 +124,12 @@ class LeftContainer(widgets.QFrame):
 
     def apply_theme_left_container(self, is_dark):
         if is_dark:
-            self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 rgba(74, 74, 74, 1), stop:1 rgba(93, 173, 226, 1))")
+            self.setStyleSheet("""
+                background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 rgba(74, 74, 74, 1), stop:1 rgba(93, 173, 226, 1));
+                border-bottom-left-radius: 20px;
+            """)
         else:
-            self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2)")
+            self.setStyleSheet("""
+                background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #5DADE2);
+                border-bottom-left-radius: 20px;
+            """)

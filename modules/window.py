@@ -13,9 +13,12 @@ class MainWindow(widgets.QMainWindow):
         super().__init__()
 
         self.setWindowFlags(core.Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(core.Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(core.Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setStyleSheet("background: transparent;")
         
         window_width = 1200
-        window_height = 828
+        window_height = 840
 
         screen = application.primaryScreen()
         screen_size = screen.size()
@@ -30,19 +33,20 @@ class MainWindow(widgets.QMainWindow):
         self.setWindowTitle("Project")
         
         content_container = widgets.QFrame(parent = self)
+        content_container.setStyleSheet("background: transparent;")
         content_layout = widgets.QVBoxLayout()
         content_layout.setSpacing(0)
         content_layout.setContentsMargins(0,0,0,0)
 
         content_container.setLayout(content_layout)
-        
         content_container.setFixedSize(window_width, window_height)
         
         self.HEADER = Header(parent = content_container)
-        content_layout.addWidget(self.HEADER)
+        content_layout.addWidget(self.HEADER, alignment = core.Qt.AlignmentFlag.AlignTop)
         
         
         central_widget = widgets.QWidget(content_container)
+        central_widget.setStyleSheet("background: transparent;") 
         central_widget.setFixedSize(1200,828)
         content_layout.addWidget(central_widget)
         
@@ -60,8 +64,8 @@ class MainWindow(widgets.QMainWindow):
             header = self.HEADER
         )
         
-        center_widget_layout.addWidget(self.LEFT_CONTAINER)
-        center_widget_layout.addWidget(self.WEATHER_CONTAINER)
+        center_widget_layout.addWidget(self.LEFT_CONTAINER, alignment = core.Qt.AlignmentFlag.AlignTop)
+        center_widget_layout.addWidget(self.WEATHER_CONTAINER, alignment = core.Qt.AlignmentFlag.AlignTop)
     
     def mousePressEvent(self, event: gui.QMouseEvent):
         if event.button() == core.Qt.MouseButton.RightButton:

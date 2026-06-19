@@ -5,7 +5,8 @@ import PyQt6.QtGui as gui
 class Header(widgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA)")
+        self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); border-top-left-radius: 20px; border-top-right-radius: 20px;")
+
         self.setFixedSize(self.window().width(), 40)
         
         layout = widgets.QHBoxLayout()
@@ -45,7 +46,6 @@ class Header(widgets.QFrame):
         max_button.clicked.connect(toggle_maximize)
 
     def mousePressEvent(self, event: gui.QMouseEvent):
-        
         if event.button() == core.Qt.MouseButton.LeftButton:
             self.CLICK_COORD = event.position().toPoint()
         else:
@@ -66,6 +66,14 @@ class Header(widgets.QFrame):
 
     def apply_theme_header(self, is_dark):
         if is_dark:
-            self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 rgba(128, 128, 128, 1), stop:1 rgba(93, 173, 226, 1))")
+            self.setStyleSheet("""
+                background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 rgba(128, 128, 128, 1), stop:1 rgba(93, 173, 226, 1));
+                border-top-left-radius: 20px;
+                border-top-right-radius: 20px;
+            """)
         else:
-            self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA)")
+            self.setStyleSheet("""
+                background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA);
+                border-top-left-radius: 20px;
+                border-top-right-radius: 20px;
+            """)

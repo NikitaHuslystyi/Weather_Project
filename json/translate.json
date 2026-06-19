@@ -33,5 +33,20 @@
         "name": "Dnipro",
         "uk": "Дніпро",
         "en": "Dnipro"
+    },
+    {
+        "name": "Kyiv",
+        "uk": "Київ",
+        "en": "Kyiv"
+    },
+    {
+        "name": "Liverpool",
+        "uk": "Ліверпуль",
+        "en": "Liverpool"
+    },
+    {
+        "name": "Bucharest",
+        "uk": "Бухарест",
+        "en": "Bucharest"
     }
 ]
