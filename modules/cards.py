@@ -15,24 +15,35 @@ class Cards(widgets.QFrame):
         self.weather_container = weather_container
 
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); background: transparent; border-radius: 0px; border-bottom: 1px solid rgba(255, 255, 255, 0.2)")
-        self.setFixedSize(330, 90)
+        self.setMinimumSize(330, 90)
+        self.setMaximumHeight(90)
+        self.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Fixed
+        )
+
         card_frame_layout = widgets.QHBoxLayout()
         self.setLayout(card_frame_layout)
-        
+
         left_layout = widgets.QVBoxLayout()
         left_layout.setSpacing(2)
-        left_layout.setContentsMargins(5,1,5,10)
+        left_layout.setContentsMargins(5, 1, 5, 10)
         left_frame = widgets.QFrame()
-        left_frame.setFixedSize(180, 90)
-        
+        left_frame.setMinimumSize(180, 90)
+        left_frame.setMaximumHeight(90)
+        left_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Fixed
+        )
+
         display_name = self._get_display_name(city_name)
-        self.left_label1 = widgets.QLabel(text = display_name)
+        self.left_label1 = widgets.QLabel(text=display_name)
         self.left_label1.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 24px; font-weight: 500;")
-        self.left_label2 = widgets.QLabel(text = "")
+        self.left_label2 = widgets.QLabel(text="")
         self.left_label2.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 500;")
-        self.left_label3 = widgets.QLabel(text = "")
+        self.left_label3 = widgets.QLabel(text="")
         self.left_label3.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 500;")
-        
+
         self.icon_label = widgets.QLabel()
         self.icon_label.setFixedSize(16, 16)
         self.icon_label.setPixmap(gui.QPixmap("media/title_bar/navigation.png").scaled(16, 16))
@@ -47,55 +58,54 @@ class Cards(widgets.QFrame):
         title_container.setLayout(self.title_layout)
 
         left_frame.setStyleSheet("""
-                                QFrame{
-                                    background: transparent;
-                                    border-bottom: none;
-                                    color: white
-                                }
-                                QLabel{
-                                    border: none;
-                                    color: white;
-                                    
-                                }
-                            """)
+            QFrame {
+                background: transparent;
+                border-bottom: none;
+                color: white
+            }
+            QLabel {
+                border: none;
+                color: white;
+            }
+        """)
 
-        left_layout.addWidget(title_container, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        left_layout.addWidget(title_container, alignment=core.Qt.AlignmentFlag.AlignLeft)
         left_layout.addSpacing(3)
-        left_layout.addWidget(self.left_label2, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        left_layout.addWidget(self.left_label2, alignment=core.Qt.AlignmentFlag.AlignLeft)
         left_layout.addSpacing(8)
-        left_layout.addWidget(self.left_label3, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        left_layout.addWidget(self.left_label3, alignment=core.Qt.AlignmentFlag.AlignLeft)
         left_frame.setLayout(left_layout)
-        
+
         right_layout = widgets.QVBoxLayout()
         right_layout.setSpacing(14)
-        right_layout.setContentsMargins(5,5,0,10)
-        
+        right_layout.setContentsMargins(5, 5, 0, 10)
+
         right_frame = widgets.QFrame()
-        self.right_label1 = widgets.QLabel(text = "")
-        self.right_label2 = widgets.QLabel(text = "")
+        self.right_label1 = widgets.QLabel(text="")
+        self.right_label2 = widgets.QLabel(text="")
 
         self.right_label1.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-size: 44px; font-weight: 500;")
         self.right_label2.setStyleSheet("color: rgba(255, 255, 255, 0.8); font-weight: 500; font-size: 12px;")
         right_frame.setStyleSheet("""
-                                QFrame{
-                                    background: transparent;
-                                    border-bottom: none;
-                                }
-                                QLabel{
-                                    border: none;
-                                }
-                            """)
-        right_frame.setFixedSize(160,90)
+            QFrame {
+                background: transparent;
+                border-bottom: none;
+            }
+            QLabel {
+                border: none;
+            }
+        """)
+        right_frame.setFixedSize(160, 90)
         right_layout.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
-        right_layout.addWidget(self.right_label1, alignment = core.Qt.AlignmentFlag.AlignRight)
-        right_layout.addWidget(self.right_label2, alignment = core.Qt.AlignmentFlag.AlignRight)
+        right_layout.addWidget(self.right_label1, alignment=core.Qt.AlignmentFlag.AlignRight)
+        right_layout.addWidget(self.right_label2, alignment=core.Qt.AlignmentFlag.AlignRight)
         right_frame.setLayout(right_layout)
 
         card_frame_layout.addWidget(left_frame)
         card_frame_layout.setSpacing(10)
-        card_frame_layout.setContentsMargins(5,5,5,5)
+        card_frame_layout.setContentsMargins(5, 5, 5, 5)
         card_frame_layout.addStretch(1)
-        card_frame_layout.addWidget(right_frame, alignment = core.Qt.AlignmentFlag.AlignRight)
+        card_frame_layout.addWidget(right_frame, alignment=core.Qt.AlignmentFlag.AlignRight)
 
         self.timezone_offset = 0
 

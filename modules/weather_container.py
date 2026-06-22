@@ -24,7 +24,11 @@ class WeatherContainer(widgets.QFrame):
         self.left_container_ref = None
         self.current_language = "en"
 
-        self.setFixedSize(830, 800)
+        self.setMinimumSize(830, 800)
+        self.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); border-bottom-right-radius: 20px;")
         
         self.WEATHER_CONTEINER_LAYOUT = widgets.QVBoxLayout(self)
@@ -33,7 +37,12 @@ class WeatherContainer(widgets.QFrame):
         self.setLayout(self.WEATHER_CONTEINER_LAYOUT)
         
         self.TOP_FRAME = widgets.QFrame(self)
-        self.TOP_FRAME.setFixedSize(788, 36)
+        self.TOP_FRAME.setMinimumSize(788, 36)
+        self.TOP_FRAME.setMaximumHeight(36)
+        self.TOP_FRAME.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Fixed
+        )
         self.TOP_FRAME.setStyleSheet("background-color: transparent; border-radius: 10px; border-bottom: none;")
         
         self.top_layout = widgets.QHBoxLayout()
@@ -186,7 +195,11 @@ class WeatherContainer(widgets.QFrame):
         self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
 
         self.CENTRAL_FRAME = widgets.QFrame(self)
-        self.CENTRAL_FRAME.setFixedSize(788, 303)
+        self.CENTRAL_FRAME.setMinimumSize(788, 303)
+        self.CENTRAL_FRAME.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.CENTRAL_FRAME.setStyleSheet("background-color: transparent")
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.CENTRAL_FRAME)
         self.WEATHER_CONTEINER_LAYOUT.addSpacing(4)
@@ -196,7 +209,11 @@ class WeatherContainer(widgets.QFrame):
         self.CENTRAL_FRAME.setLayout(self.CENTRAL_LAYOUT)
         
         self.weather_right_frame = widgets.QFrame()
-        self.weather_right_frame.setFixedSize(390, 303)
+        self.weather_right_frame.setMinimumSize(390, 303)
+        self.weather_right_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.weather_right_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border-bottom: none;")
         self.weather_right_layout1 = widgets.QVBoxLayout()
         self.weather_right_layout1.setContentsMargins(16, 8, 16, 16)
@@ -262,7 +279,11 @@ class WeatherContainer(widgets.QFrame):
         
         
         self.weather_left_frame = widgets.QFrame()
-        self.weather_left_frame.setFixedSize(390, 303)
+        self.weather_left_frame.setMinimumSize(390, 303)
+        self.weather_left_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.weather_left_frame.setStyleSheet("""
             background-color: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
@@ -374,7 +395,11 @@ class WeatherContainer(widgets.QFrame):
         #New task
         self.forecast_weather_frame = widgets.QFrame()
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.forecast_weather_frame)
-        self.forecast_weather_frame.setFixedSize(788, 157)
+        self.forecast_weather_frame.setMinimumSize(788, 157)
+        self.forecast_weather_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Fixed
+        )
         self.forecast_weather_frame.setStyleSheet("""
             background: rgba(0, 0, 0, 0.2);
             border-bottom: none;
@@ -484,7 +509,11 @@ class WeatherContainer(widgets.QFrame):
         self.WEATHER_CONTEINER_LAYOUT.addSpacing(5)
         # Діаграма погоди
         self.weather_sheet_frame = widgets.QFrame()
-        self.weather_sheet_frame.setFixedSize(788, 197)
+        self.weather_sheet_frame.setMinimumSize(788, 197)
+        self.weather_sheet_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.weather_sheet_frame.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border-bottom: none;")
         
         self.text_diagram_layout1 = widgets.QVBoxLayout()
@@ -518,7 +547,11 @@ class WeatherContainer(widgets.QFrame):
         self.text_diagram_layout2.addWidget(self.information_diagram_label)
         
         self.weather_images_frame = widgets.QFrame()
-        self.weather_images_frame.setFixedSize(728, 24)
+        self.weather_images_frame.setMinimumSize(728, 24)
+        self.weather_images_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Fixed
+        )
         self.weather_images_frame.setStyleSheet("""
             background: transparent;
             border: none;
@@ -531,7 +564,11 @@ class WeatherContainer(widgets.QFrame):
         self.text_diagram_layout1.addWidget(self.weather_images_frame)
         
         self.diagram_frame = widgets.QFrame()
-        self.diagram_frame.setFixedSize(755, 106)
+        self.diagram_frame.setMinimumSize(755, 106)
+        self.diagram_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.diagram_frame.setStyleSheet("""
             background: transparent;
             border: none;
@@ -546,7 +583,11 @@ class WeatherContainer(widgets.QFrame):
         self.diagram_frame2.setStyleSheet("""
             border-image: url(media/title_bar/Diagram.png) 0 0 0 0 stretch stretch;
             """)
-        self.diagram_frame2.setFixedSize(727, 106)
+        self.diagram_frame2.setMinimumSize(727, 106)
+        self.diagram_frame2.setSizePolicy(
+            widgets.QSizePolicy.Policy.Expanding,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         self.diagram_layout = widgets.QHBoxLayout()
         self.diagram_frame2.setLayout(self.diagram_layout)
 
@@ -556,7 +597,11 @@ class WeatherContainer(widgets.QFrame):
             bar_count=21,
         )
         self.diagram_temp_frame = widgets.QFrame()
-        self.diagram_temp_frame.setFixedSize(24, 106)
+        self.diagram_temp_frame.setMinimumSize(24, 106)
+        self.diagram_temp_frame.setSizePolicy(
+            widgets.QSizePolicy.Policy.Fixed,
+            widgets.QSizePolicy.Policy.Expanding
+        )
         temp_layout = widgets.QVBoxLayout()
         temp_layout.setContentsMargins(0, 2, 0, 2)
         temp_layout.setSpacing(0)

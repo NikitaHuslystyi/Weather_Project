@@ -48,5 +48,25 @@
         "name": "Bucharest",
         "uk": "Бухарест",
         "en": "Bucharest"
+    },
+    {
+        "name": "Дніпро",
+        "uk": "Дніпро",
+        "en": "Dnipro"
+    },
+    {
+        "name": "Ліверпуль",
+        "uk": "Ліверпуль",
+        "en": "Liverpool"
+    },
+    {
+        "name": "London",
+        "uk": "Лондон",
+        "en": "London"
+    },
+    {
+        "name": "Odessa",
+        "uk": "Одеса",
+        "en": "Odesa"
     }
 ]
