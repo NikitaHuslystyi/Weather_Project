@@ -68,5 +68,20 @@
         "name": "Odessa",
         "uk": "Одеса",
         "en": "Odesa"
+    },
+    {
+        "name": "Tokyo",
+        "uk": "Токіо",
+        "en": "Tokyo"
+    },
+    {
+        "name": "Beijing",
+        "uk": "Пекін",
+        "en": "Beijing"
+    },
+    {
+        "name": "Hong Kong",
+        "uk": "Гонконг",
+        "en": "Hong Kong Island"
     }
 ]

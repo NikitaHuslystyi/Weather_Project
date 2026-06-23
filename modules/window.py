@@ -84,5 +84,15 @@ class MainWindow(widgets.QMainWindow):
             print(f"Key: {event.key()}")
             print(f"Text: {event.text()}")
 
+    def set_app_size(self, width, height):
+            screen = application.primaryScreen()
+            screen_size = screen.size()
+            center_x = (screen_size.width() - width) // 2
+            center_y = (screen_size.height() - height) // 2
+
+            self.setMinimumSize(width, height)
+            self.setGeometry(center_x, center_y, width, height)
+            self.content_container.setGeometry(0, 0, width, height)
+
 
 main_window = MainWindow()

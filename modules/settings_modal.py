@@ -14,6 +14,7 @@ class SettingsModal(widgets.QFrame):
         self.selected_settings_language = None
         self.selected_settings_country = None
         self.selected_settings_city = None
+        
 
         self.setGeometry(19, 56, 790, 688)
         self.setStyleSheet("background-color: #363636; border-radius: 10px; border: none;")
@@ -135,6 +136,8 @@ class SettingsModal(widgets.QFrame):
 
         self.tabs_city_finder_button.clicked.connect(lambda: self.switch_settings_tab("city_finder"))
         self.tabs_app_language_button.clicked.connect(lambda: self.switch_settings_tab("language"))
+        self.tabs_app_size_button.clicked.connect(lambda: self.switch_settings_tab("app_size"))
+        self.tabs_image_list_button.clicked.connect(lambda: self.switch_settings_tab("image_list"))
 
         self.whole_settings_layout.addWidget(self.settings_options_frame)
 
@@ -199,6 +202,333 @@ class SettingsModal(widgets.QFrame):
         language_input_layout.addWidget(self.down_arrow_label3, alignment=core.Qt.AlignmentFlag.AlignRight)
 
         self.language_input_frame.mousePressEvent = self.on_language_input_clicked
+        
+
+        # Фрейм "Списки зображень"
+        self.full_list_images_frame = widgets.QFrame()
+        self.full_list_images_frame.setFixedSize(544, 578)
+        self.full_list_images_layout = widgets.QVBoxLayout(self.full_list_images_frame)
+        self.full_list_images_layout.setContentsMargins(0, 0, 0, 0)
+        self.full_list_images_layout.setSpacing(0)
+        self.full_list_images_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.settings_options_layout.addWidget(self.full_list_images_frame, alignment=core.Qt.AlignmentFlag.AlignTop)
+        self.full_list_images_frame.setVisible(False)
+
+        # Заголовок
+        list_images_frame = widgets.QFrame()
+        list_images_frame.setFixedSize(490, 21)
+        list_images_layout = widgets.QHBoxLayout(list_images_frame)
+        list_images_layout.setContentsMargins(0, 0, 0, 0)
+        list_images_label = widgets.QLabel("Списки зображень")
+        self.list_images_label = list_images_label
+        list_images_label.setStyleSheet("color: rgba(255,255,255,1); font-size: 18px; font-weight: 400; background: transparent;")
+        list_images_layout.addWidget(list_images_label, alignment=core.Qt.AlignmentFlag.AlignLeft)
+        self.global_list_images_label = list_images_label
+        self.full_list_images_layout.addWidget(list_images_frame, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        self.full_list_images_layout.addSpacing(24)
+
+        # Контейнер для паков
+        all_packs_frame = widgets.QFrame()
+        all_packs_frame.setFixedSize(490, 292)
+        all_packs_layout = widgets.QVBoxLayout(all_packs_frame)
+        all_packs_layout.setContentsMargins(0, 0, 0, 0)
+        all_packs_layout.setSpacing(20)
+        all_packs_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.full_list_images_layout.addWidget(all_packs_frame, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        #Pack1
+        list_images_pack1_button = widgets.QPushButton()
+        list_images_pack1_button.setFixedSize(490, 136)
+        list_images_pack1_button.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
+        all_packs_layout.addWidget(list_images_pack1_button, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        list_images_pack1_button_layout = widgets.QVBoxLayout(list_images_pack1_button)
+        list_images_pack1_button_layout.setContentsMargins(16, 12, 16, 12)
+        list_images_pack1_button_layout.setSpacing(8)
+
+        pack1_label1 = widgets.QLabel("Список зображень №1")
+        self.pack1_label1 = pack1_label1
+        pack1_label1.setStyleSheet("color: rgba(255,255,255,1); font-size: 14px; font-weight: 500; background: transparent;")
+        pack1_label1.setFixedHeight(18)
+        list_images_pack1_button_layout.addWidget(pack1_label1, alignment=core.Qt.AlignmentFlag.AlignLeft)
+
+        pack1_icons_frame = widgets.QFrame()
+        pack1_icons_frame.setStyleSheet("background: transparent; border: none;")
+        pack1_icons_layout = widgets.QHBoxLayout(pack1_icons_frame)
+        pack1_icons_layout.setContentsMargins(0, 0, 0, 0)
+        pack1_icons_layout.setSpacing(22)
+        pack1_icons_layout.setAlignment(core.Qt.AlignmentFlag.AlignLeft)
+        list_images_pack1_button_layout.addWidget(pack1_icons_frame)
+
+        for icon_path in [
+            "media/button_icons_pack/Pack1_Sunny.png",
+            "media/button_icons_pack/Pack1_Cloudy.png",
+            "media/button_icons_pack/Pack1_Rainy.png",
+            "media/button_icons_pack/Pack1_few_Cloudy_Night.png",
+            "media/button_icons_pack/Pack1_Cloudy_Night.png",
+        ]:
+            lbl = widgets.QLabel()
+            lbl.setFixedSize(74, 74)
+            lbl.setStyleSheet("background-color: transparent;")
+            lbl.setPixmap(gui.QPixmap(icon_path).scaled(74, 74, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
+            pack1_icons_layout.addWidget(lbl)
+
+        #Pack2
+        list_images_pack2_button = widgets.QPushButton()
+        list_images_pack2_button.setFixedSize(490, 136)
+        list_images_pack2_button.setStyleSheet("background-color: transparent; border-radius: 4px; border: none;")
+        all_packs_layout.addWidget(list_images_pack2_button, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        list_images_pack2_button_layout = widgets.QVBoxLayout(list_images_pack2_button)
+        list_images_pack2_button_layout.setContentsMargins(16, 12, 16, 12)
+        list_images_pack2_button_layout.setSpacing(8)
+
+        pack2_label = widgets.QLabel("Список зображень №2")
+        self.pack2_label = pack2_label
+        pack2_label.setStyleSheet("color: rgba(255,255,255,1); font-size: 14px; font-weight: 500; background: transparent;")
+        pack2_label.setFixedHeight(18)
+        list_images_pack2_button_layout.addWidget(pack2_label, alignment=core.Qt.AlignmentFlag.AlignLeft)
+
+        pack2_icons_frame = widgets.QFrame()
+        pack2_icons_frame.setStyleSheet("background: transparent; border: none;")
+        pack2_icons_layout = widgets.QHBoxLayout(pack2_icons_frame)
+        pack2_icons_layout.setContentsMargins(0, 0, 0, 0)
+        pack2_icons_layout.setSpacing(22)
+        pack2_icons_layout.setAlignment(core.Qt.AlignmentFlag.AlignLeft)
+        list_images_pack2_button_layout.addWidget(pack2_icons_frame)
+
+        for icon_path in [
+            "media/button_icons_pack/Pack2_Sunny.png",
+            "media/button_icons_pack/Pack2_few_Cloudy.png",
+            "media/button_icons_pack/Pack2_Rainy.png",
+            "media/button_icons_pack/Pack2_Moon.png",
+            "media/button_icons_pack/Pack2_Cloudy.png",
+        ]:
+            lbl = widgets.QLabel()
+            lbl.setFixedSize(74, 74)
+            lbl.setStyleSheet("background-color: transparent;")
+            lbl.setPixmap(gui.QPixmap(icon_path).scaled(74, 74, core.Qt.AspectRatioMode.KeepAspectRatio, core.Qt.TransformationMode.SmoothTransformation))
+            pack2_icons_layout.addWidget(lbl)
+
+        self.use_second_icon_pack = False
+        list_images_pack1_button.clicked.connect(self.select_pack1)
+        list_images_pack2_button.clicked.connect(self.select_pack2)
+        self.icon_pack1_button = list_images_pack1_button
+        self.icon_pack2_button = list_images_pack2_button
+
+        self.full_list_images_layout.addSpacing(24)
+
+        save_pack_frame = widgets.QFrame()
+        save_pack_frame.setFixedSize(105, 38)
+        save_pack_frame.setStyleSheet("background-color: #2b2b2b; border-radius: 4px")
+        save_pack_layout = widgets.QHBoxLayout(save_pack_frame)
+        save_pack_layout.setContentsMargins(16, 8, 16, 8)
+
+        save_pack_btn = widgets.QPushButton(text="Save")
+        save_pack_btn.setStyleSheet("background-color: transparent; color: rgba(255,255,255,1); font-size: 14px; font-weight: 400")
+        save_pack_layout.addWidget(save_pack_btn)
+        self.save_pack_frame = save_pack_frame
+        save_pack_btn.clicked.connect(self.on_icon_pack_save)
+        self.save_pack_btn = save_pack_btn
+        self.full_list_images_layout.addWidget(save_pack_frame, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        # Фрейм "Розмір додатку"
+        self.whole_app_size_frame = widgets.QFrame()
+        self.whole_app_size_frame.setFixedSize(544, 578)
+        self.whole_app_size_layout = widgets.QVBoxLayout(self.whole_app_size_frame)
+        self.whole_app_size_layout.setContentsMargins(0, 0, 0, 0)
+        self.whole_app_size_layout.setSpacing(0)
+        self.whole_app_size_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.settings_options_layout.addWidget(self.whole_app_size_frame)
+        self.whole_app_size_frame.setVisible(False)
+
+        full_container = widgets.QFrame()
+        full_container.setFixedSize(239, 219)
+        full_container_layout = widgets.QVBoxLayout(full_container)
+        full_container_layout.setContentsMargins(0, 0, 0, 0)
+        full_container_layout.setSpacing(0)
+        full_container_layout.setAlignment(core.Qt.AlignmentFlag.AlignTop)
+        self.whole_app_size_layout.addWidget(full_container, alignment=core.Qt.AlignmentFlag.AlignTop)
+
+        # Заголовок
+        title_frame = widgets.QFrame()
+        title_frame.setFixedSize(239, 21)
+        title_layout = widgets.QHBoxLayout(title_frame)
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_label = widgets.QLabel("Оберіть розмір додатку")
+        title_label.setStyleSheet("color: rgba(255,255,255,1); font-size: 18px; font-weight: 400; background: transparent;")
+        title_layout.addWidget(title_label, alignment=core.Qt.AlignmentFlag.AlignLeft)
+        self.app_size_title_label = title_label
+        full_container_layout.addWidget(title_frame)
+        full_container_layout.setSpacing(24)
+
+        full_sizes_frame  = widgets.QFrame()
+        full_sizes_frame.setFixedSize(239, 112)
+        full_container_layout.addWidget(full_sizes_frame)
+        full_sizes_layout = widgets.QVBoxLayout(full_sizes_frame)
+        full_sizes_layout.setContentsMargins(0, 0, 0, 0)
+        
+        #1
+        size_frame1 = widgets.QFrame()
+        size_frame1.setFixedSize(96, 16)
+        full_sizes_layout.addWidget(size_frame1, alignment=core.Qt.AlignmentFlag.AlignTop)
+        size_layout1 = widgets.QHBoxLayout(size_frame1)
+        size_layout1.setContentsMargins(0, 0, 7, 0)
+        
+        circle_button_frame1 = widgets.QFrame()
+        size_layout1.addWidget(circle_button_frame1, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        circle_button_frame1.setFixedSize(16, 16)
+        
+        circle_button_layout1 = widgets.QHBoxLayout(circle_button_frame1)
+        circle_button_layout1.setContentsMargins(0, 0, 0, 0)
+        circle_button_layout1.setSpacing(0)
+        
+        filled_circle_button1 = widgets.QPushButton()
+        filled_circle_button1 .setFixedSize(16, 16)
+        filled_circle_button1 .setIconSize(core.QSize(16,16))
+        filled_circle_button1 .setStyleSheet("border: none; background-color: transparent;")
+        
+        circle_button_layout1.addWidget(filled_circle_button1)
+        circle_button_layout1.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        circle_btn_icon1 = gui.QIcon("media/title_bar/Filled_Circle_btn.png")
+        filled_circle_button1 .setIcon(circle_btn_icon1)
+        
+        
+        size_label1 = widgets.QLabel(text = "1200x840")
+        size_label1.setFixedSize(63, 14)
+        size_label1.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400;")
+        size_layout1.addWidget(size_label1, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        
+        #2
+        size_frame2 = widgets.QFrame()
+        size_frame2.setFixedSize(96, 16)
+        full_sizes_layout.addWidget(size_frame2, alignment=core.Qt.AlignmentFlag.AlignTop)
+        size_layout2 = widgets.QHBoxLayout(size_frame2)
+        size_layout2.setContentsMargins(0, 0, 0, 0)
+        
+        circle_button_frame2 = widgets.QFrame()
+        size_layout2.addWidget(circle_button_frame2, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        circle_button_frame2.setFixedSize(16, 16)
+        
+        circle_button_layout2 = widgets.QHBoxLayout(circle_button_frame2)
+        circle_button_layout2.setContentsMargins(0, 0, 0, 0)
+        circle_button_layout2.setSpacing(0)
+        
+        not_filled_circle_button2 = widgets.QPushButton()
+        not_filled_circle_button2.setFixedSize(16, 16)
+        not_filled_circle_button2.setIconSize(core.QSize(16,16))
+        not_filled_circle_button2.setStyleSheet("border: none; background-color: transparent;")
+        
+        circle_button_layout2.addWidget(not_filled_circle_button2)
+        circle_button_layout2.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        circle_btn_icon2 = gui.QIcon("media/title_bar/Circle_btn.png")
+        not_filled_circle_button2.setIcon(circle_btn_icon2)
+        
+        
+        size_label2 = widgets.QLabel(text = "1440x1024")
+        size_label2.setFixedSize(72, 14)
+        size_label2.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400;")
+        size_layout2.addWidget(size_label2, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        
+        #3
+        size_frame3 = widgets.QFrame()
+        size_frame3.setFixedSize(96, 16)
+        full_sizes_layout.addWidget(size_frame3, alignment=core.Qt.AlignmentFlag.AlignTop)
+        size_layout3 = widgets.QHBoxLayout(size_frame3)
+        size_layout3.setContentsMargins(0, 0, 7, 0)
+        
+        circle_button_frame3 = widgets.QFrame()
+        size_layout3.addWidget(circle_button_frame3, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        circle_button_frame3.setFixedSize(16, 16)
+        
+        circle_button_layout3 = widgets.QHBoxLayout(circle_button_frame3)
+        circle_button_layout3.setContentsMargins(0, 0, 0, 0)
+        circle_button_layout3.setSpacing(0)
+        
+        not_filled_circle_button3 = widgets.QPushButton()
+        not_filled_circle_button3.setFixedSize(16, 16)
+        not_filled_circle_button3.setIconSize(core.QSize(16,16))
+        not_filled_circle_button3.setStyleSheet("border: none; background-color: transparent;")
+        
+        circle_button_layout3.addWidget(not_filled_circle_button3)
+        circle_button_layout3.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        circle_btn_icon3 = gui.QIcon("media/title_bar/Circle_btn.png")
+        not_filled_circle_button3.setIcon(circle_btn_icon3)
+        
+        
+        size_label3 = widgets.QLabel(text = "1512x982")
+        size_label3.setFixedSize(63, 14)
+        size_label3.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400;")
+        size_layout3.addWidget(size_label3, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        
+        #4
+        size_frame4 = widgets.QFrame()
+        size_frame4.setFixedSize(96, 16)
+        full_sizes_layout.addWidget(size_frame4, alignment=core.Qt.AlignmentFlag.AlignTop)
+        size_layout4 = widgets.QHBoxLayout(size_frame4)
+        size_layout4.setContentsMargins(0, 0, 0, 0)
+        
+        circle_button_frame4 = widgets.QFrame()
+        size_layout4.addWidget(circle_button_frame4, alignment = core.Qt.AlignmentFlag.AlignLeft)
+        circle_button_frame4.setFixedSize(16, 16)
+        
+        circle_button_layout4 = widgets.QHBoxLayout(circle_button_frame4)
+        circle_button_layout4.setContentsMargins(0, 0, 0, 0)
+        circle_button_layout4.setSpacing(0)
+        
+        not_filled_circle_button4 = widgets.QPushButton()
+        not_filled_circle_button4.setFixedSize(16, 16)
+        not_filled_circle_button4.setIconSize(core.QSize(16,16))
+        not_filled_circle_button4.setStyleSheet("border: none; background-color: transparent;")
+        
+        circle_button_layout4.addWidget(not_filled_circle_button4)
+        circle_button_layout4.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
+        circle_btn_icon4 = gui.QIcon("media/title_bar/Circle_btn.png")
+        not_filled_circle_button4.setIcon(circle_btn_icon4)
+        
+        
+        size_label4 = widgets.QLabel(text = "1728x1117")
+        size_label4.setFixedSize(72, 14)
+        size_label4.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 14px; font-weight: 400;")
+        size_layout4.addWidget(size_label4, alignment = core.Qt.AlignmentFlag.AlignRight)
+        
+        
+        
+        self.app_size_options = [
+            {"button": filled_circle_button1, "frame": size_frame1, "width": 1200, "height": 840},
+            {"button": not_filled_circle_button2, "frame": size_frame2, "width": 1440, "height": 1024},
+            {"button": not_filled_circle_button3, "frame": size_frame3, "width": 1512, "height": 982},
+            {"button": not_filled_circle_button4, "frame": size_frame4, "width": 1728, "height": 1117},
+        ]
+
+        for opt in self.app_size_options:
+            opt["frame"].setCursor(core.Qt.CursorShape.PointingHandCursor)
+            opt["button"].setCursor(core.Qt.CursorShape.PointingHandCursor)
+            opt["button"].clicked.connect(lambda checked, o=opt: self.on_app_size_selected(o))
+            opt["frame"].mousePressEvent = lambda event, o=opt: self.on_app_size_selected(o)
+
+        self.selected_app_size = (1200, 840)
+
+        # Кнопка зберегти
+        save_size_frame = widgets.QFrame()
+        save_size_frame.setFixedSize(105, 38)
+        save_size_frame.setStyleSheet("background-color: #2b2b2b; border-radius: 4px")
+        save_size_layout = widgets.QHBoxLayout(save_size_frame)
+        save_size_layout.setContentsMargins(16, 8, 16, 8)
+
+        save_size_btn = widgets.QPushButton(text="Save")
+        save_size_btn.setStyleSheet("background-color: transparent; color: rgba(255,255,255,1); font-size: 14px; font-weight: 400")
+        save_size_layout.addWidget(save_size_btn)
+        self._save_size_btn = save_size_btn
+        self._save_size_frame = save_size_frame
+
+        save_size_btn.clicked.connect(self.on_app_size_save)
+
+        full_container_layout.addWidget(save_size_frame)
 
         # Дропдаун мов
         self.language_dropdown = widgets.QFrame(self)
@@ -473,6 +803,18 @@ class SettingsModal(widgets.QFrame):
         self.added_cities_layout.addWidget(self.added_cities_scroll_area)
 
         self.whole_city_finder_layout.addWidget(self.added_cities_frame)
+        
+        
+        
+        
+        
+        self._tab_buttons = {
+            "city_finder": self.tabs_city_finder_button_label,
+            "language":    self.tabs_app_language_label,
+            "app_size":    self.tabs_app_size_label,
+            "image_list":  self.tabs_image_list_label,
+        }
+        self.switch_settings_tab("city_finder")
 
     def show_modal(self):
         self.setVisible(True)
@@ -527,6 +869,7 @@ class SettingsModal(widgets.QFrame):
         self.tabs_app_language_label.setText(t["tab_language"][lang])
         self.tabs_image_list_label.setText(t["tab_image_list"][lang])
         self.save_button.setText(t["save_button"][lang])
+        self.save_pack_btn.setText(t["save_button"][lang])
         self.language_save_button.setText(t["save_button"][lang])
 
         self.city_finder_text_label.setText(t["city_finder_title"][lang])
@@ -534,6 +877,12 @@ class SettingsModal(widgets.QFrame):
         self.city_text_label.setText(t["city_label"][lang])
         self.coord_text_label.setText(t["coord_label"][lang])
         self.added_cities_text_label.setText(t["added_cities_title"][lang])
+        self.list_images_label.setText(t["list_images_label"][lang])
+        self.pack1_label1.setText(t["pack1_label1"][lang])
+        self.pack2_label.setText(t["pack2_label"][lang])
+
+        self.app_size_title_label.setText(t["app_size_title"][lang])
+        self._save_size_btn.setText(t["save_button"][lang])
 
         self.language_title_label.setText(t["language_title"][lang])
         self.language_text_label.setText(t["language_label"][lang])
@@ -554,7 +903,24 @@ class SettingsModal(widgets.QFrame):
     def switch_settings_tab(self, tab_name):
         self.whole_city_finder_frame.setVisible(tab_name == "city_finder")
         self.whole_language_frame.setVisible(tab_name == "language")
+        self.whole_app_size_frame.setVisible(tab_name == "app_size")
+        self.full_list_images_frame.setVisible(tab_name == "image_list")
+
         self.language_dropdown.setVisible(False)
+
+        active_style   = "background-color: rgba(255,255,255,0.2); color: rgba(255,255,255,1); border-radius: 6px;"
+        inactive_style = "background-color: transparent; color: rgba(255,255,255,1); border-radius: 6px;"
+
+        for key, label in self._tab_buttons.items():
+            btn = label.parent()
+            btn.setStyleSheet(
+                f"background-color: {'rgba(255,255,255,0.2)' if key == tab_name else 'transparent'};"
+                f"font-size: 16px; font-weight: {'500' if key == tab_name else '400'};"
+                f"border: none; border-radius: 6px;"
+            )
+            label.setStyleSheet(
+                f"background-color: transparent; color: {'rgba(255,255,255,1)' if key == tab_name else 'rgba(255,255,255,0.2)'};"
+            )
 
     def on_language_input_clicked(self, event):
         if self.language_dropdown.isVisible():
@@ -667,6 +1033,30 @@ class SettingsModal(widgets.QFrame):
         self.city_search_input.clear()
         self.selected_settings_country = None
         self.selected_settings_city = None
+
+    def on_app_size_selected(self, option):
+            for opt in self.app_size_options:
+                icon_name = "Filled_Circle_btn.png" if opt is option else "Circle_btn.png"
+                opt["button"].setIcon(gui.QIcon(f"media/title_bar/{icon_name}"))
+            self.selected_app_size = (option["width"], option["height"])
+            self._save_size_frame.setStyleSheet("background-color: #000000; border-radius: 4px")
+
+    def select_pack1(self):
+        self.use_second_icon_pack = False
+        self.icon_pack1_button.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
+        self.icon_pack2_button.setStyleSheet("background-color: transparent; border-radius: 4px; border: none;")
+
+    def select_pack2(self):
+        self.use_second_icon_pack = True
+        self.icon_pack2_button.setStyleSheet("background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; border: none;")
+        self.icon_pack1_button.setStyleSheet("background-color: transparent; border-radius: 4px; border: none;")
+
+    def on_icon_pack_save(self):
+        self.WC.apply_icon_pack(self.use_second_icon_pack)
+
+    def on_app_size_save(self):
+        width, height = self.selected_app_size
+        self.WC.apply_app_size(width, height)
 
     def _make_settings_dd_card(self, text, parent, callback):
         card = widgets.QFrame(parent)

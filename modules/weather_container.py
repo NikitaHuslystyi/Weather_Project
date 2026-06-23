@@ -2,12 +2,7 @@ import PyQt6.QtCore as core
 import PyQt6.QtWidgets as widgets
 import PyQt6.QtGui as gui
 from datetime import datetime, timedelta
-import json
-import requests
 import os
-import folium
-import io
-import threading
 from utils import request
 from utils import json_write
 from .weather_scroll import ForecastCard, SunCard
@@ -15,14 +10,22 @@ from .diagrama import WeatherDiagram
 from .searched_card import SearchCityCard
 from .settings_modal import SettingsModal
 from config import API_KEY
+from modules.translations import TRANSLATIONS as APP_TRANSLATIONS, DAYS_TRANSLATIONS as APP_DAYS_TRANSLATIONS
+from utils.city_loader import get_cities_list, load_cities, ensure_cities_loaded
+from utils.city_translator import load_translations, get_city_display_name, fetch_city_translation
+
 
 class WeatherContainer(widgets.QFrame):
+    TRANSLATIONS = APP_TRANSLATIONS
+    DAYS_TRANSLATIONS = APP_DAYS_TRANSLATIONS
     def __init__(self, parent):
         super().__init__(parent)
         self.city_name = None
         self.selected_search_city = None
         self.left_container_ref = None
         self.current_language = "en"
+        self.use_second_icon_pack = False
+        self._base_dir = os.path.join(os.path.dirname(__file__), "..")
 
         self.setMinimumSize(830, 800)
         self.setSizePolicy(
@@ -635,6 +638,32 @@ class WeatherContainer(widgets.QFrame):
         
         self._ensure_cities_loaded()
 
+    def _get_cities_list(self):
+        return get_cities_list(self._base_dir)
+
+    def load_cities(self):
+        return load_cities(self._base_dir)
+
+    def _ensure_cities_loaded(self):
+        ensure_cities_loaded(self._base_dir)
+
+    def _load_translations(self):
+        return load_translations(self._base_dir)
+
+    def _get_city_display_name(self, english_name, lang_code=None):
+        if lang_code is None:
+            lang_code = getattr(self, "current_language", "ua")
+        if not hasattr(self, '_city_translations'):
+            self._city_translations = self._load_translations()
+        return get_city_display_name(self._city_translations, english_name, lang_code)
+
+    def _fetch_city_translation(self, city_name):
+        if not hasattr(self, '_city_translations'):
+            self._city_translations = self._load_translations()
+        if not hasattr(self, '_translation_in_progress'):
+            self._translation_in_progress = set()
+        fetch_city_translation(self._base_dir, self._city_translations, city_name, self._translation_in_progress)
+
     def update_city(self, city_name):
         self.city_name = city_name
         self.refresh_weather2()
@@ -659,23 +688,42 @@ class WeatherContainer(widgets.QFrame):
         is_night = hour >= 18 or hour < 6
         
         weather_type = data["weather"][0]["main"]
-        
-        day_icons = {
-            "Clear": "media/title_bar/Sunny.png",
-            "Clouds": "media/title_bar/Cloudy.png",
-            "Rain": "media/title_bar/Rainy.png",
-            "Drizzle": "media/title_bar/Rainy.png",
-            "Thunderstorm": "media/title_bar/Thunderstorm.png",
-            "Snow": "media/title_bar/Snowy.png"
-        }
-        night_icons = {
-            "Clear": "media/title_bar/Moon.png",
-            "Clouds": "media/title_bar/Cloudy_night.png",
-            "Rain": "media/title_bar/Rainy_night.png",
-            "Drizzle": "media/title_bar/Rainy_night.png",
-            "Thunderstorm": "media/title_bar/Thunderstorm.png",
-            "Snow": "media/title_bar/Snowy_night.png"
-        }
+
+        if self.use_second_icon_pack:
+            day_icons = {
+                "Clear": "media/pack_2/Sunny_pack2.png",
+                "Clouds": "media/pack_2/Cloudy_pack2.png",
+                "Rain": "media/pack_2/Rainy_pack2.png",
+                "Drizzle": "media/pack_2/Rainy_pack2.png",
+                "Thunderstorm": "media/pack_2/Rainy_pack2.png",
+                "Snow": "media/pack_2/Snowy_pack2.png"
+            }
+            night_icons = {
+                "Clear": "media/pack_2/Moon_pack2.png",
+                "Clouds": "media/pack_2/Cloudy_moon_pack2.png",
+                "Rain": "media/pack_2/Rainy_moon_pack2.png",
+                "Drizzle": "media/pack_2/Rainy_moon_pack2.png",
+                "Thunderstorm": "media/pack_2/Rainy_moon_pack2.png",
+                "Snow": "media/pack_2/Snowy_moon_pack2.png"
+            }
+        else:
+            day_icons = {
+                "Clear": "media/title_bar/Sunny.png",
+                "Clouds": "media/title_bar/Cloudy.png",
+                "Rain": "media/title_bar/Rainy.png",
+                "Drizzle": "media/title_bar/Rainy.png",
+                "Thunderstorm": "media/title_bar/Thunderstorm.png",
+                "Snow": "media/title_bar/Snowy.png"
+            }
+            night_icons = {
+                "Clear": "media/title_bar/Moon.png",
+                "Clouds": "media/title_bar/Cloudy_night.png",
+                "Rain": "media/title_bar/Rainy_night.png",
+                "Drizzle": "media/title_bar/Rainy_night.png",
+                "Thunderstorm": "media/title_bar/Thunderstorm.png",
+                "Snow": "media/title_bar/Snowy_night.png"
+            }
+
         if is_night:
             icon_path = night_icons.get(weather_type, "media/title_bar/Cloudy_night.png")
         else:
@@ -748,54 +796,6 @@ class WeatherContainer(widgets.QFrame):
         self.search_input.clear()
         self.search_input.setFocus()
 
-    def _load_translations(self):
-        path = os.path.join(os.path.dirname(__file__), "..", "json", "translate.json")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            translations = {}
-            for item in data:
-                eng_name = item.get("name", "")
-                if eng_name:
-                    translations[eng_name] = {
-                        "uk": item.get("uk", eng_name),
-                        "en": item.get("en", eng_name),
-                    }
-            return translations
-        except Exception:
-            return {}
-
-    def _get_city_display_name(self, english_name, lang_code=None):
-        if lang_code is None:
-            lang_code = getattr(self, "current_language", "ua")
-        if not hasattr(self, '_city_translations'):
-            self._city_translations = self._load_translations()
-        entry = self._city_translations.get(english_name)
-        if not entry:
-            return english_name
-        if lang_code == "ua":
-            return entry.get("uk") or english_name
-        else:
-            return entry.get("en") or english_name
-
-    def load_cities(self):
-        response = requests.get("https://countriesnow.space/api/v0.1/countries")
-        data = response.json()
-        result = []
-        for country in data["data"]:
-            for city in country["cities"]:
-                result.append({
-                    "city": city,
-                    "country": country["country"]
-                })
-        result = sorted(result, key=lambda x: x["city"])
-        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as file:
-            json.dump(result, file, ensure_ascii=False, indent=4)
-        print(f"Збережено {len(result)} міст")
-        return result
-
     def on_search_text_changed(self, text):
         text = text.strip()
         if not text:
@@ -852,66 +852,6 @@ class WeatherContainer(widgets.QFrame):
         self.add_button.setVisible(False)
         self.selected_search_city = None
 
-    def _get_cities_list(self):
-        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if data and isinstance(data[0], str):
-                return self.load_cities()
-            return data
-        except Exception:
-            pass
-
-    def _ensure_cities_loaded(self):
-        path = os.path.join(os.path.dirname(__file__), "..", "json", "cities.json")
-        needs_reload = False
-        if not os.path.exists(path):
-            needs_reload = True
-        else:
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if data and isinstance(data[0], str):
-                    needs_reload = True
-            except Exception:
-                needs_reload = True
-        if needs_reload:
-            thread = threading.Thread(target=self.load_cities, daemon=True)
-            thread.start()
-
-    TRANSLATIONS = {
-        "settings_title": {"ua": "Налаштування", "en": "Settings"},
-        "tab_city_finder": {"ua": "Пошук міста", "en": "City search"},
-        "tab_app_size": {"ua": "Розмір додатку", "en": "App size"},
-        "tab_language": {"ua": "Мова додатку", "en": "App language"},
-        "tab_image_list": {"ua": "Списки зображень", "en": "Image lists"},
-        "city_finder_title": {"ua": "Пошук міста", "en": "City search"},
-        "country_label": {"ua": "Країна", "en": "Country"},
-        "city_label": {"ua": "Місто", "en": "City"},
-        "coord_label": {"ua": "Координати", "en": "Coordinates"},
-        "save_button": {"ua": "Зберегти", "en": "Save"},
-        "added_cities_title": {"ua": "Додані міста", "en": "Added cities"},
-        "current_position": {"ua": "Поточна позиція", "en": "Current location"},
-        "today_label": {"ua": "Сьогодні", "en": "Today"},
-        "forecast_label": {"ua": "Прогноз на 36 годин", "en": "36-hour forecast"},
-        "language_title": {"ua": "Оберіть мову додатку", "en": "Choose app language"},
-        "language_label": {"ua": "Мова додатку", "en": "App language"},
-        "search_placeholder": {"ua": "Пошук", "en": "Search"},
-        "search_country_placeholder": {"ua": "Виберіть країну", "en": "Search country"},
-        "search_city_placeholder": {"ua": "Виберіть місто", "en": "Search city"},
-        "add_button": {"ua": "Додати", "en": "Add"},
-        "max_label": {"ua": "Макс.", "en": "Max"},
-        "min_label": {"ua": "мін.", "en": "min"},
-        "cloudy_weather_end_of_day": {"ua": "Хмарна погода до кінця дня", "en": "Cloudy weather until end of day"},
-        "dropdown_header": {"ua": "Результати пошуку", "en": "search results"},
-    }
-
-    DAYS_TRANSLATIONS = {
-        "ua": ["Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота", "Неділя"],
-        "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    }
-
     def _t(self, key):
         return self.TRANSLATIONS[key][self.current_language]
 
@@ -937,53 +877,6 @@ class WeatherContainer(widgets.QFrame):
     def _update_city_name_translation(self, lang_code):
         display_name = self._get_city_display_name(self.city_name, lang_code)
         self.town_name_label.setText(display_name)
-
-    def _fetch_city_translation(self, city_name):
-        if not hasattr(self, '_translation_in_progress'):
-            self._translation_in_progress = set()
-
-        if not hasattr(self, '_city_translations'):
-            self._city_translations = self._load_translations()
-        if city_name in self._city_translations:
-            return
-        if city_name in self._translation_in_progress:
-            return
-        self._translation_in_progress.add(city_name)
-
-        path = os.path.join(os.path.dirname(__file__), "..", "json", "translate.json")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                existing = json.load(f)
-        except Exception:
-            existing = []
-
-        if any(item.get("name") == city_name for item in existing):
-            self._translation_in_progress.discard(city_name)
-            return
-
-        try:
-            response = requests.get(
-                f"https://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=1&appid={API_KEY}"
-            )
-            data = response.json()
-            if data:
-                local_names = data[0].get("local_names", {})
-                uk_name = local_names.get("uk", city_name)
-                en_name = local_names.get("en", city_name)
-
-                existing.append({
-                    "name": city_name,
-                    "uk": uk_name,
-                    "en": en_name,
-                })
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(existing, f, ensure_ascii=False, indent=4)
-
-                self._city_translations[city_name] = {"uk": uk_name, "en": en_name}
-        except Exception as e:
-            print(f"Помилка перекладу {city_name}: {e}")
-        finally:
-            self._translation_in_progress.discard(city_name)
 
     def clear_weather_display(self):
         self.city_name = None
@@ -1014,3 +907,12 @@ class WeatherContainer(widgets.QFrame):
                 background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA);
                 border-bottom-right-radius: 20px;
             """)
+
+    def apply_icon_pack(self, use_second_pack):
+        self.use_second_icon_pack = use_second_pack
+        self.refresh_weather2()
+
+    def apply_app_size(self, width, height):
+            window = self.window()
+            if window and hasattr(window, "set_app_size"):
+                window.set_app_size(width, height)
