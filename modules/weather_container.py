@@ -35,7 +35,7 @@ class WeatherContainer(widgets.QFrame):
         self.setStyleSheet("background-color: qlineargradient(x1:1, y1:0, x2:0, y2:1, stop:0 #FFDF56, stop:1 #87CEFA); border-bottom-right-radius: 20px;")
         
         self.WEATHER_CONTEINER_LAYOUT = widgets.QVBoxLayout(self)
-        self.WEATHER_CONTEINER_LAYOUT.setContentsMargins(20, 10, 20, 80)
+        self.WEATHER_CONTEINER_LAYOUT.setContentsMargins(20, 10, 20, 60)
         self.WEATHER_CONTEINER_LAYOUT.setSpacing(0)
         self.setLayout(self.WEATHER_CONTEINER_LAYOUT)
         
@@ -205,7 +205,7 @@ class WeatherContainer(widgets.QFrame):
         )
         self.CENTRAL_FRAME.setStyleSheet("background-color: transparent")
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.CENTRAL_FRAME)
-        self.WEATHER_CONTEINER_LAYOUT.addSpacing(4)
+        self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
         self.CENTRAL_LAYOUT = widgets.QHBoxLayout(self.CENTRAL_FRAME)
         self.CENTRAL_LAYOUT.setSpacing(10)
         self.CENTRAL_LAYOUT.setContentsMargins(0, 0, 0, 0)
@@ -509,7 +509,7 @@ class WeatherContainer(widgets.QFrame):
         self.information_weather_layout2.addWidget(self.scroll_controls_frame)
         
         self.WEATHER_CONTEINER_LAYOUT.addWidget(self.forecast_weather_frame)
-        self.WEATHER_CONTEINER_LAYOUT.addSpacing(5)
+        self.WEATHER_CONTEINER_LAYOUT.addSpacing(10)
         # Діаграма погоди
         self.weather_sheet_frame = widgets.QFrame()
         self.weather_sheet_frame.setMinimumSize(788, 197)
