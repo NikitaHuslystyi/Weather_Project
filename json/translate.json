@@ -83,5 +83,20 @@
         "name": "Hong Kong",
         "uk": "Гонконг",
         "en": "Hong Kong Island"
+    },
+    {
+        "name": "Amsterdam",
+        "uk": "Амстердам",
+        "en": "Amsterdam"
+    },
+    {
+        "name": "Copenhagen",
+        "uk": "Копенгаген",
+        "en": "Copenhagen"
+    },
+    {
+        "name": "Warsaw",
+        "uk": "Варшава",
+        "en": "Warsaw"
     }
 ]
