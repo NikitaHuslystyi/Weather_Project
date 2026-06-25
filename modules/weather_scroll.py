@@ -88,7 +88,8 @@ class SunCard(widgets.QFrame):
     def __init__(self, parent, sun_time, sun_type, lang="ua"):
         super().__init__(parent)
 
-        self.setFixedSize(92, 82)
+        card_width = 60 if lang == "en" else 92
+        self.setFixedSize(card_width, 82)
         self.setStyleSheet("background: transparent; color: white")
 
         layout = widgets.QVBoxLayout()
@@ -111,7 +112,7 @@ class SunCard(widgets.QFrame):
             label_text = "Sunrise" if sun_type == "sunrise" else "Sunset"
 
         self.text_label = widgets.QLabel(text=label_text)
-        self.text_label.setFixedSize(90, 20)
+        self.text_label.setFixedSize(card_width, 20)
         self.text_label.setStyleSheet("color: rgba(255, 255, 255, 1); font-size: 16px; font-weight: 500;")
         self.text_label.setAlignment(core.Qt.AlignmentFlag.AlignCenter)
         self.text_label.setWordWrap(False)

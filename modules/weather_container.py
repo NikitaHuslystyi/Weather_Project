@@ -564,7 +564,22 @@ class WeatherContainer(widgets.QFrame):
         self.weather_images_layout.setSpacing(14)
         self.weather_images_layout.setContentsMargins(0, 0, 0, 0)
         self.weather_images_frame.setLayout(self.weather_images_layout)
-        self.text_diagram_layout1.addWidget(self.weather_images_frame)
+        
+
+        self.weather_images_row = widgets.QFrame()
+        self.weather_images_row.setStyleSheet("background: transparent; border: none;")
+        self.weather_images_row_layout = widgets.QHBoxLayout(self.weather_images_row)
+        self.weather_images_row_layout.setContentsMargins(0, 0, 0, 0)
+        self.weather_images_row_layout.setSpacing(6)
+
+        self.weather_images_row_layout.addWidget(self.weather_images_frame)
+
+        self.weather_images_spacer = widgets.QFrame()
+        self.weather_images_spacer.setFixedWidth(24)
+        self.weather_images_spacer.setStyleSheet("background: transparent; border: none;")
+        self.weather_images_row_layout.addWidget(self.weather_images_spacer)
+
+        self.text_diagram_layout1.addWidget(self.weather_images_row)
         
         self.diagram_frame = widgets.QFrame()
         self.diagram_frame.setMinimumSize(755, 106)
@@ -598,6 +613,7 @@ class WeatherContainer(widgets.QFrame):
             weather_images_layout=self.weather_images_layout,
             diagram_layout=self.diagram_layout,
             bar_count=21,
+            bars_container=self.diagram_frame2
         )
         self.diagram_temp_frame = widgets.QFrame()
         self.diagram_temp_frame.setMinimumSize(24, 106)
@@ -629,6 +645,8 @@ class WeatherContainer(widgets.QFrame):
         
         self.CENTRAL_LAYOUT.addWidget(self.weather_left_frame)
         self.CENTRAL_LAYOUT.addWidget(self.weather_right_frame)
+        
+        self.diagram_frame2.installEventFilter(self)
         
         self.watch_timezone_offset = 0
 
@@ -916,3 +934,8 @@ class WeatherContainer(widgets.QFrame):
             window = self.window()
             if window and hasattr(window, "set_app_size"):
                 window.set_app_size(width, height)
+
+    def eventFilter(self, obj, event):
+        if obj is self.diagram_frame2 and event.type() == core.QEvent.Type.Resize:
+            self.weather_diagram.recompute_heights()
+        return super().eventFilter(obj, event)
