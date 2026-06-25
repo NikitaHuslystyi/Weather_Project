@@ -915,7 +915,7 @@ class SettingsModal(widgets.QFrame):
             btn = label.parent()
             btn.setStyleSheet(
                 f"background-color: {'rgba(255,255,255,0.2)' if key == tab_name else 'transparent'};"
-                f"font-size: 16px; font-weight: {'500' if key == tab_name else '400'};"
+                f"font-size: 16px; font-weight: 400;"
                 f"border: none; border-radius: 6px;"
             )
             label.setStyleSheet(
